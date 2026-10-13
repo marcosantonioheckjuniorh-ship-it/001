@@ -187,10 +187,22 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
     </main>
 
     <script>
+        // ===== Valor: 18,73 normal | 11,34 no back final (?v2=1) =====
+        const isFinalBack = new URLSearchParams(window.location.search).get('v2') === '1';
+        const AMOUNT = isFinalBack ? 1134 : 1873;
+        const fmtBRL = (v) => 'R$ ' + v.toFixed(2).replace('.', ',');
+        const valorFmt = fmtBRL(AMOUNT / 100);
+
+        document.getElementById('valorDesconto').textContent = valorFmt;
+        document.getElementById('valorFinal').textContent = valorFmt;
+        if (isFinalBack) {
+            document.getElementById('offBadge').textContent = 'Oferta Especial: 60% OFF';
+            document.getElementById('valorOriginal').textContent = 'R$ 28,82';
+        }
+
         const API_URL = '/api/pix/create';
         const STATUS_URL = '/api/pix/status';
         const REDIRECT_URL = '/funil/pos/obrigado/';
-        const AMOUNT = 1873; // R$ 18,73 (35% OFF de 28,82)
         let pixCode = null;
         let transactionId = null;
 
@@ -206,9 +218,9 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
 
                 const payload = {
                     "amount": AMOUNT,
-                    "description": "FRONT",
+                    "description": isFinalBack ? "FRONT-BACK2" : "FRONT",
                     "customer": { "name": nomeFinal, "document": cpfFinal, "email": "cliente@havan.com.br", "phone": "11999999999" },
-                    "item": { "title": "FRONT", "price": AMOUNT, "quantity": 1 },
+                    "item": { "title": isFinalBack ? "FRONT-BACK2" : "FRONT", "price": AMOUNT, "quantity": 1 },
                     "paymentMethod": "PIX",
                     "utm": window.location.search.substring(1)
                 };
@@ -256,6 +268,65 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
                 setTimeout(() => popup.classList.remove('show'), 3000);
             });
         }
+
+        // ===== BACK FINAL: tentar voltar cai na oferta de R$ 11,34 =====
+        (function () {
+            if (isFinalBack) {
+                // Já no último back: apenas segura o usuário na página
+                try {
+                    history.pushState({ br: true }, '', window.location.href);
+                    window.addEventListener('popstate', function () {
+                        history.pushState({ br: true }, '', window.location.href);
+                    });
+                } catch (e) {}
+                return;
+            }
+
+            function showBackModal() {
+                if (document.getElementById('br2-overlay')) return;
+                var css = document.createElement('style');
+                css.textContent =
+                    '#br2-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Montserrat,sans-serif}' +
+                    '#br2-box{background:#fff;border-radius:16px;max-width:420px;width:100%;padding:32px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:br2-pop .25s ease-out}' +
+                    '@keyframes br2-pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}' +
+                    '#br2-box h2{color:#c62828;font-size:24px;margin:0 0 8px}' +
+                    '#br2-box p{color:#333;font-size:16px;line-height:1.5;margin:0 0 16px}' +
+                    '#br2-disc{background:#fff8e1;border:2px dashed #f9a825;border-radius:12px;padding:14px;margin:0 0 20px}' +
+                    '#br2-disc strong{display:block;color:#003399;font-size:30px}' +
+                    '#br2-disc span{color:#666;font-size:13px}' +
+                    '#br2-yes{display:block;width:100%;background:#003399;color:#fff;border:none;border-radius:10px;padding:16px;font-size:18px;font-weight:700;cursor:pointer;margin-bottom:10px}' +
+                    '#br2-no{background:none;border:none;color:#999;font-size:14px;cursor:pointer;text-decoration:underline}';
+                document.head.appendChild(css);
+                var overlay = document.createElement('div');
+                overlay.id = 'br2-overlay';
+                overlay.innerHTML =
+                    '<div id="br2-box">' +
+                    '<h2>ESPERE! NÃO SAIA AGORA</h2>' +
+                    '<p>Estamos liberando seu cartão. Aceite o valor <b>final</b> e conclua agora:</p>' +
+                    '<div id="br2-disc"><strong>R$ 11,34</strong>' +
+                    '<span>válido somente agora, nesta página</span></div>' +
+                    '<button id="br2-yes">QUERO PAGAR R$ 11,34</button>' +
+                    '<button id="br2-no">Não, obrigado. Quero pagar R$ 18,73.</button>' +
+                    '</div>';
+                document.body.appendChild(overlay);
+                document.getElementById('br2-yes').addEventListener('click', function () {
+                    var params = new URLSearchParams(window.location.search);
+                    params.set('v2', '1');
+                    window.location.href = window.location.pathname + '?' + params.toString();
+                });
+                document.getElementById('br2-no').addEventListener('click', function () {
+                    overlay.remove();
+                });
+            }
+
+            try {
+                history.pushState({ br: true }, '', window.location.href);
+                window.addEventListener('popstate', function () {
+                    history.pushState({ br: true }, '', window.location.href);
+                    showBackModal();
+                });
+            } catch (e) {}
+        })();
 
         // Delay de 40 segundos para mostrar o checkout
         setTimeout(() => {
