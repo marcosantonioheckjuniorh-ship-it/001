@@ -37,14 +37,15 @@ async function load(){
   const r=await fetch(U,{method:'POST',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify({_days:+d.value,_senha:SENHA})})
   const rows=await r.json(); if(!Array.isArray(rows)){sessionStorage.removeItem('rel_pw');app.style.display='none';login.style.display='block';err.textContent='Senha incorreta';return}
   login.style.display='none';app.style.display='block';sessionStorage.setItem('rel_pw',SENHA)
-  const P={},paths={},left={};let pcs=0
+  const P={},paths={},left={};let pcs=0,utm={com:0,sem:0}
   for(const x of rows){
     if(x.event==='pc_blocked'){pcs+=+x.sessions;continue}
+    if(x.page==='__utm'){utm[x.event]=+x.sessions;continue}
     const p=P[x.page]||(P[x.page]={page_view:0,back_click:0,back_modal_shown:0,back_accept:0,back_decline:0,pix_generated:0,pix_paid:0,cameFrom:0})
     if(x.event in p)p[x.event]+=+x.sessions
     if(x.event==='page_view'&&x.target){const from=x.target.replace('voltar:','');const k=from+' → '+x.page+(x.target.startsWith('voltar:')?' (voltar)':'');paths[k]=(paths[k]||0)+ +x.sessions;left[from]=(left[from]||0)+ +x.sessions}
   }
-  pc.innerHTML='🖥️ Tentativas pelo computador (bloqueadas → YouTube): <b style="color:var(--tx)">'+pcs+'</b>'
+  pc.innerHTML='🖥️ Tentativas pelo computador (bloqueadas → YouTube): <b style="color:var(--tx)">'+pcs+'</b> &nbsp;·&nbsp; 📱 Celular com UTM: <b class="good">'+utm.com+'</b> &nbsp;·&nbsp; sem UTM: <b class="bad">'+utm.sem+'</b>'
   const pages=Object.keys(P).sort((a,b)=>rank(a)-rank(b))
   let h='<table><tr><th>Página</th><th>Visitas</th><th>Saíram</th><th>Voltar</th><th>Aviso de saída</th><th>Aceitou</th><th>Recusou</th><th>PIX gerado</th><th>PIX pago</th></tr>'
   for(const pg of pages){const p=P[pg],out=Math.max(0,p.page_view-(left[pg]||0)),pct=p.page_view?Math.round(out/p.page_view*100):0
