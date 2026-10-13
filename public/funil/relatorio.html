@@ -47,12 +47,12 @@ async function load(){
     h+=`<tr><td>${pg}</td><td>${p.page_view}</td><td class="${pct>50?'bad':''}">${out} (${pct}%)</td><td>${p.back_click}</td><td>${p.back_modal_shown}</td><td class="good">${p.back_accept}</td><td>${p.back_decline}</td><td>${p.pix_generated}</td><td class="good">${p.pix_paid}</td></tr>`}
   t1.innerHTML=h+'</table>'
   const max=Math.max(1,...pages.map(p=>P[p].page_view)),bw=34,H=220,W=pages.length*bw+40
-  let g=`<svg width="${W}" height="${H+90}" font-size="10" font-family="system-ui">`
+  let g=`<svg width="${W}" height="${H+105}" font-size="10" font-family="system-ui">`
   pages.forEach((pg,i)=>{const p=P[pg],out=Math.max(0,p.page_view-(left[pg]||0)),x=30+i*bw,hv=p.page_view/max*H,ho=out/max*H
-    g+=`<rect x="${x}" y="${H-hv+10}" width="${bw-8}" height="${hv}" fill="#4f8cff" rx="3"><title>${pg}: ${p.page_view} visitas</title></rect>`
-    g+=`<rect x="${x}" y="${H-ho+10}" width="${bw-8}" height="${ho}" fill="#ff5c6c" opacity=".85" rx="3"><title>${pg}: ${out} saíram</title></rect>`
-    g+=`<text x="${x+(bw-8)/2}" y="${H-hv+6}" text-anchor="middle" fill="#e8ecf7">${p.page_view}</text>`
-    g+=`<text transform="translate(${x+(bw-8)/2},${H+18}) rotate(60)" fill="#8590ab">${pg}</text>`})
+    g+=`<rect x="${x}" y="${H-hv+22}" width="${bw-8}" height="${hv}" fill="#4f8cff" rx="3"><title>${pg}: ${p.page_view} visitas</title></rect>`
+    g+=`<rect x="${x}" y="${H-ho+22}" width="${bw-8}" height="${ho}" fill="#ff5c6c" opacity=".85" rx="3"><title>${pg}: ${out} saíram</title></rect>`
+    g+=`<text x="${x+(bw-8)/2}" y="${H-hv+16}" text-anchor="middle" fill="#e8ecf7">${p.page_view}</text>`
+    g+=`<text transform="translate(${x+(bw-8)/2},${H+30}) rotate(60)" fill="#8590ab">${pg}</text>`})
   chart.innerHTML=g+'</svg><div style="font-size:13px;color:#8590ab;margin-top:8px">■ <b style="color:#4f8cff">azul</b> = visitas &nbsp; ■ <b style="color:#ff5c6c">vermelho</b> = saíram do funil nessa página</div>'
   let h2='<table><tr><th>Caminho</th><th>Pessoas</th></tr>'
   for(const [k,v] of Object.entries(paths).sort((a,b)=>b[1]-a[1]))h2+=`<tr><td>${k}</td><td>${v}</td></tr>`
