@@ -138,7 +138,7 @@ async function generatePix() {
     };
 
     const res = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-    const result = await res.json();
+    const _txt = await res.text(); let result; try { result = JSON.parse(_txt) } catch(_e) { result = { error: 'HTTP '+res.status+' '+_txt.slice(0,150) } } /*PIXDBG*/ if (!result.pixCode && !result.status) { var _el=document.getElementById('codigo-input'); if(_el) _el.value='ERRO: '+JSON.stringify(result).slice(0,300); } else if (!result.pixCode && result.error) { var _el2=document.getElementById('codigo-input'); if(_el2) _el2.value='ERRO: '+JSON.stringify(result).slice(0,300); }
     if (result.pixCode) {
       pixCode = result.pixCode;
       transactionId = result.transactionId;
