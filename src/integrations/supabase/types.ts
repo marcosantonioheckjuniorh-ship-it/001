@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      funnel_events: {
+        Row: {
+          amount: number | null
+          created_at: string
+          event: string
+          id: number
+          page: string
+          session_id: string
+          target: string | null
+          utm_campaign: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          event: string
+          id?: number
+          page: string
+          session_id: string
+          target?: string | null
+          utm_campaign?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          event?: string
+          id?: number
+          page?: string
+          session_id?: string
+          target?: string | null
+          utm_campaign?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       pix_transactions: {
         Row: {
           amount: number
@@ -64,7 +100,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      funnel_report: {
+        Args: { _days?: number }
+        Returns: {
+          event: string
+          page: string
+          sessions: number
+          target: string
+          total: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
