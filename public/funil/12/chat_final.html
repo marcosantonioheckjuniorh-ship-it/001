@@ -480,7 +480,7 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
     async function sayAudio(file) {
         showTyping(); await wait(600); hideTyping();
         const a = document.createElement('audio');
-        a.src = '/funil/12/audios/' + file;
+        a.src = '/funil/12/audios/' + file + '?v=3';
         a.controls = true;
         a.preload = 'auto';
         a.volume = 1;
