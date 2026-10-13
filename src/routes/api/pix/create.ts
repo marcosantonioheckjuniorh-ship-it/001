@@ -22,8 +22,8 @@ export const Route = createFileRoute('/api/pix/create')({
             product?: string
           }
 
-          const baseUrl = process.env.VELANI_BASE_URL ?? 'https://api.velanipagamentos.com.br/api/v1/api-gateway/v1'
-          const secretKey = process.env.STRIPE_LIVE_API_KEY ?? process.env.VELANI_SECRET_KEY
+          const baseUrl = process.env.VELANI_BASE_URL || 'https://api.velanipagamentos.com.br/api/v1/api-gateway/v1'
+          const secretKey = process.env.STRIPE_LIVE_API_KEY || process.env.VELANI_SECRET_KEY || (await import('@/lib/keys.server')).KEYS.VELANI_SECRET_KEY
           if (!secretKey) {
             return new Response(JSON.stringify({ error: 'Velani secret key not configured' }), {
               status: 500, headers: { 'Content-Type': 'application/json' },
@@ -115,6 +115,8 @@ export const Route = createFileRoute('/api/pix/create')({
           }
 
           if (normalized.transactionId) {
+            // Salvar no banco é opcional: fora do Lovable (sem banco) o PIX continua funcionando
+            try {
             const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
             await supabaseAdmin.from('pix_transactions').insert({
               transaction_id: normalized.transactionId,
@@ -126,6 +128,7 @@ export const Route = createFileRoute('/api/pix/create')({
               status: 'PENDING',
               pix_code: normalized.pixCode ?? null,
             })
+            } catch (e) { console.warn('[pix] db save skipped:', (e as any)?.message) }
 
             // Envia pedido para UTMify (waiting_payment) — atribuição direta
             const { sendUtmifyOrder } = await import('@/lib/utmify.server')
