@@ -1,3 +1,39 @@
+// Voltar à prova de falhas: se o celular ignorar o truque do histórico e voltar
+// pra página anterior, essa página anterior manda a pessoa pro back certo.
+(function () {
+  if (window.top !== window.self) return
+  var p = location.pathname.replace(/\/index\.html$/, '/').replace(/([^/])$/, '$1/')
+  var q = new URLSearchParams(location.search), keep = new URLSearchParams(location.search)
+  keep.delete('desc'); keep.delete('v2')
+  var ks = keep.toString() ? '?' + keep.toString() : ''
+  var to = null
+  if (/\/funil\/pos\/(pagfront|obrigado)\/$/.test(p)) to = '/funil/pos/back/front/index.html' + ks
+  else if (/\/funil\/pos\/up\d+(check)?\/$/.test(p)) to = location.pathname + location.search + '#br'
+  else if (/\/funil\/pos\/back\/frontvsl\/$/.test(p)) to = location.pathname + location.search + (q.get('v2') ? '' : '#br')
+  function check() {
+    try {
+      var nav = performance.getEntriesByType('navigation')[0]
+      var br = JSON.parse(sessionStorage.getItem('br_guard') || 'null')
+      if (br && br.from !== location.href && br.to) {
+        sessionStorage.removeItem('br_guard'); sessionStorage.setItem('funnel_back', '1')
+        location.replace(br.to); return true
+      }
+    } catch (e) {}
+  }
+  function arm() { if (to) sessionStorage.setItem('br_guard', JSON.stringify({ from: location.href, to: to })); else sessionStorage.removeItem('br_guard') }
+  var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {}
+  if (nav.type === 'back_forward' && check()) return
+  arm()
+  addEventListener('pageshow', function (e) { if (e.persisted) { if (!check()) arm() } })
+  if (location.hash === '#br') {
+    try { history.replaceState(history.state, '', location.pathname + location.search) } catch (e) {}
+    window.__brOpen = true
+    var tries = 0, t = setInterval(function () {
+      tries++
+      if (window.__brShow) { clearInterval(t); window.__brShow() } else if (tries > 50) clearInterval(t)
+    }, 100)
+  }
+})();
 // Registro do funil: visitas, cliques em voltar, avisos de saída e PIX.
 (function () {
   if (window.__funnelTrack) return; window.__funnelTrack = 1
