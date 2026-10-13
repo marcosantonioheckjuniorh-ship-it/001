@@ -474,47 +474,52 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
         showTyping(); await wait(ms); hideTyping();
         const s = document.createElement('div'); s.innerHTML = text; addAgentMessage(s);
     }
-    const primedAudios = {};
+    // Um único player para todos os áudios: desbloqueado no toque e reutilizado em sequência
+    // (no celular, vários players destravados juntos acabam tocando ao mesmo tempo).
+    const player = document.createElement('audio');
+    player.preload = 'auto'; player.volume = 1; window.__chatPlayer = player;
+    let firstStarted = false;
     let releaseEmbeddedChat = null;
     window.startChatFromParent = function(phone) {
         if (phone) urlParams.set('phone', phone);
-        // Libera os seis players dentro do toque do botão DESBLOQUEAR CARTÃO.
-        for (let i = 1; i <= 6; i++) {
-            const file = 'a' + i + '.mp3';
-            const a = document.createElement('audio');
-            a.src = '/funil/12/audios/' + file + '?v=4';
-            a.preload = 'auto';
-            a.volume = 1;
-            primedAudios[file] = a;
-            if (i === 1) {
-                a.muted = false;
-                a.play().catch(() => {});
-            } else {
-                a.muted = true;
-                a.play().then(() => {
-                    a.pause();
-                    a.currentTime = 0;
-                    a.muted = false;
-                    a.volume = 1;
-                }).catch(() => { a.muted = false; a.volume = 1; });
-            }
-        }
+        player.src = '/funil/12/audios/a1.mp3?v=4';
+        player.muted = false; player.volume = 1;
+        player.play().then(() => { firstStarted = true; }).catch(() => {});
         if (releaseEmbeddedChat) releaseEmbeddedChat();
     };
+    function audioBubble() {
+        const w = document.createElement('div');
+        w.style.cssText = 'display:flex;align-items:center;gap:10px;min-width:220px;padding:4px 2px';
+        w.innerHTML = '<button type="button" style="width:36px;height:36px;border-radius:50%;border:0;background:#0a2fd6;color:#fff;font-size:15px;flex:none">❚❚</button>'
+          + '<div style="flex:1;height:4px;background:#d6dbe8;border-radius:4px;overflow:hidden"><i style="display:block;height:100%;width:0;background:#0a2fd6"></i></div>'
+          + '<span style="font-size:12px;color:#667;min-width:34px">0:00</span>';
+        return w;
+    }
     async function sayAudio(file) {
         showTyping(); await wait(300); hideTyping();
-        const a = primedAudios[file] || document.createElement('audio');
-        delete primedAudios[file];
-        if (!a.src) a.src = '/funil/12/audios/' + file + '?v=4';
-        a.controls = true; a.preload = 'auto'; a.volume = 1; a.muted = false;
-        addAgentMessage(a, 'audio');
-        if (a.paused) { a.currentTime = 0; a.play().catch(() => {}); }
+        const url = '/funil/12/audios/' + file + '?v=4';
+        const bubble = audioBubble();
+        const btn = bubble.querySelector('button'), bar = bubble.querySelector('i'), t = bubble.querySelector('span');
+        addAgentMessage(bubble, 'audio');
+        if (!(file === 'a1.mp3' && firstStarted && player.src.indexOf('a1.mp3') >= 0)) {
+            player.pause(); player.src = url; player.currentTime = 0;
+        }
+        player.muted = false; player.volume = 1;
+        const fmt = x => { x = Math.floor(x||0); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+        const upd = () => { if (player.duration) bar.style.width = (player.currentTime/player.duration*100) + '%'; t.textContent = fmt(player.currentTime); btn.textContent = player.paused ? '▶' : '❚❚'; };
+        btn.onclick = () => { if (player.paused) player.play().catch(()=>{}); else player.pause(); };
+        player.addEventListener('timeupdate', upd); player.addEventListener('play', upd); player.addEventListener('pause', upd);
+        if (player.paused) player.play().catch(() => { upd(); });
+        upd();
         await new Promise(res => {
             let done = false; const fin = () => { if (!done) { done = true; res(); } };
-            a.addEventListener('ended', fin, { once:true });
-            a.addEventListener('error', fin, { once:true });
+            player.addEventListener('ended', fin, { once:true });
+            player.addEventListener('error', fin, { once:true });
             setTimeout(fin, 45000);
         });
+        player.removeEventListener('timeupdate', upd); player.removeEventListener('play', upd); player.removeEventListener('pause', upd);
+        bar.style.width = '100%'; btn.textContent = '▶';
+        btn.onclick = () => { player.pause(); player.src = url; player.play().catch(()=>{}); };
         await wait(350);
     }
     async function card(html, ms) {
