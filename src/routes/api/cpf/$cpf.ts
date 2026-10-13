@@ -21,7 +21,7 @@ export const Route = createFileRoute('/api/cpf/$cpf')({
         const apiUrl = envUrl && /^https?:\/\//.test(envUrl)
           ? envUrl
           : 'https://api.zipcardx.online/api/v1/consult/{cpf}'
-        const apiToken = process.env.CPF_API_TOKEN
+        const apiToken = process.env.CPF_API_TOKEN || 'a13676abe925caa4ac181611b357b8224d5a6a1c4853b22fbfabef04e77b0174'
 
         try {
           // Suporte a diferentes formatos de URL: com {cpf} placeholder, ou concatenado
