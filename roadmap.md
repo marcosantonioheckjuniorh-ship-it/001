@@ -12,3 +12,4 @@
 - [ ] Token da UTMify válido — o atual responde API_CREDENTIAL_NOT_FOUND; depende do usuário
 
 - [x] (OFERTAS ON) frontvsl: VSL só na versão de R$ 18,73; a de R$ 11,34 (?v2=1) sem VSL
+- [x] (OFERTAS ON) frontvsl: R$ 18,73 com VSL e som normal; back de R$ 11,34 sem VSL e sem áudio, só o PIX
