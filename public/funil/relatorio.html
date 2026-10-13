@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>Relatório do funil</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#f4f6fb;color:#1a2340;margin:0;padding:20px}
+h1{font-size:22px;margin:0 0 4px}p{color:#5a6480;margin:0 0 16px}
+select{padding:6px 10px;border-radius:8px;border:1px solid #ccd}
+table{border-collapse:collapse;width:100%;background:#fff;border-radius:12px;overflow:hidden;margin:12px 0 28px;font-size:14px}
+th,td{padding:9px 10px;text-align:right;border-bottom:1px solid #eef}th:first-child,td:first-child{text-align:left}
+th{background:#003399;color:#fff;font-weight:600}.bad{color:#c62828;font-weight:700}.good{color:#2e7d32;font-weight:700}
+h2{font-size:17px;margin:8px 0}
+</style></head><body>
+<h1>Relatório do funil</h1>
+<p>Pessoas únicas por página. "Saíram" = visitaram e não foram pra nenhuma outra página.
+ Período: <select id="d"><option value="1">hoje (24h)</option><option value="7" selected>7 dias</option><option value="30">30 dias</option></select></p>
+<h2>Por página</h2><div id="t1">Carregando…</div>
+<h2>Caminhos (de onde veio → pra onde foi)</h2><div id="t2"></div>
+<script>
+const U='https://xaxlyhkxxoquypemizer.supabase.co/rest/v1/rpc/funnel_report',K='sb_publishable_4Xeky6w6KAFphFbNRE4fLg_maaSMTIR'
+const ORDER=['inicio','1','2','3','4','5','6','7','8','9','10','11','12','pagfront','back/front','back/frontvsl','back/frontvsl_v2','up1','up1check','up1check_desc','up2','up2check','up2check_desc','up3','up3check','up3check_desc','up4','up4check','up4check_desc','up5','up5check','up5check_desc','up6','up6check','up6check_desc','up7','up7check','up7check_desc','up8','up8check','up8check_desc','obrigado']
+const rank=p=>{const i=ORDER.indexOf(p);return i<0?999:i}
+async function load(){
+  const r=await fetch(U,{method:'POST',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify({_days:+d.value})})
+  const rows=await r.json(); if(!Array.isArray(rows)){t1.textContent='Erro: '+JSON.stringify(rows);return}
+  const P={},paths={},left={}
+  for(const x of rows){
+    const p=P[x.page]||(P[x.page]={page_view:0,back_click:0,back_modal_shown:0,back_accept:0,back_decline:0,pix_generated:0,pix_paid:0,cameFrom:0})
+    if(x.event in p)p[x.event]+=+x.sessions
+    if(x.event==='page_view'&&x.target){const from=x.target.replace('voltar:','');const k=from+' → '+x.page+(x.target.startsWith('voltar:')?' (voltar)':'');paths[k]=(paths[k]||0)+ +x.sessions;left[from]=(left[from]||0)+ +x.sessions}
+  }
+  const pages=Object.keys(P).sort((a,b)=>rank(a)-rank(b))
+  let h='<table><tr><th>Página</th><th>Visitas</th><th>Saíram</th><th>Voltar</th><th>Aviso de saída</th><th>Aceitou</th><th>Recusou</th><th>PIX gerado</th><th>PIX pago</th></tr>'
+  for(const pg of pages){const p=P[pg],out=Math.max(0,p.page_view-(left[pg]||0)),pct=p.page_view?Math.round(out/p.page_view*100):0
+    h+=`<tr><td>${pg}</td><td>${p.page_view}</td><td class="${pct>50?'bad':''}">${out} (${pct}%)</td><td>${p.back_click}</td><td>${p.back_modal_shown}</td><td class="good">${p.back_accept}</td><td>${p.back_decline}</td><td>${p.pix_generated}</td><td class="good">${p.pix_paid}</td></tr>`}
+  t1.innerHTML=h+'</table>'
+  let h2='<table><tr><th>Caminho</th><th>Pessoas</th></tr>'
+  for(const [k,v] of Object.entries(paths).sort((a,b)=>b[1]-a[1]))h2+=`<tr><td>${k}</td><td>${v}</td></tr>`
+  t2.innerHTML=h2+'</table>'
+}
+d.onchange=load;load()
+</script></body></html>
