@@ -43,10 +43,11 @@
             if (b.history && b.history.pushState) {
                 b.history.pushState(null, null, b.location.href);
                 b.onpopstate = function() {
-                    b.location.replace(r);
+                    b.location.replace(r + b.location.search);
                 };
             }
-        })(window, "/funil/pos/back/01/index.html");
+        })(window, "/funil/pos/back/front/index.html");
+        (function(){var done=false;function a(){if(done)return;done=true;try{history.pushState(null,'',location.href)}catch(e){}['click','touchstart','scroll','keydown'].forEach(function(ev){removeEventListener(ev,a,true)})}['click','touchstart','scroll','keydown'].forEach(function(ev){addEventListener(ev,a,{capture:true,passive:true})})})();
     </script>
 
     <script>
