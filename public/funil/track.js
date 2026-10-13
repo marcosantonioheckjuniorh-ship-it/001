@@ -1,3 +1,5 @@
+// Só conta celular (PC é mandado pro YouTube e não deve entrar nas estatísticas)
+if (/Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(navigator.userAgent)) {
 // Voltar à prova de falhas: se o celular ignorar o truque do histórico e voltar
 // pra página anterior, essa página anterior manda a pessoa pro back certo.
 (function () {
@@ -114,3 +116,5 @@
     })
   }
 })()
+
+}
