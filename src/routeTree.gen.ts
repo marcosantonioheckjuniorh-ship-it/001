@@ -11,10 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FunilPageRouteImport } from './routes/funil.$page'
-import { Route as FunilPosSplatRouteImport } from './routes/funil.pos.$'
-import { Route as ApiPixStatusRouteImport } from './routes/api/pix/status'
-import { Route as ApiPixCreateRouteImport } from './routes/api/pix/create'
 import { Route as ApiCpfCpfRouteImport } from './routes/api/cpf/$cpf'
+import { Route as ApiFunnelInsightsRouteImport } from './routes/api/funnel/insights'
+import { Route as ApiPixCreateRouteImport } from './routes/api/pix/create'
+import { Route as ApiPixStatusRouteImport } from './routes/api/pix/status'
+import { Route as FunilPosSplatRouteImport } from './routes/funil.pos.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -26,14 +27,14 @@ const FunilPageRoute = FunilPageRouteImport.update({
   path: '/funil/$page',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FunilPosSplatRoute = FunilPosSplatRouteImport.update({
-  id: '/funil/pos/$',
-  path: '/funil/pos/$',
+const ApiCpfCpfRoute = ApiCpfCpfRouteImport.update({
+  id: '/api/cpf/$cpf',
+  path: '/api/cpf/$cpf',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPixStatusRoute = ApiPixStatusRouteImport.update({
-  id: '/api/pix/status',
-  path: '/api/pix/status',
+const ApiFunnelInsightsRoute = ApiFunnelInsightsRouteImport.update({
+  id: '/api/funnel/insights',
+  path: '/api/funnel/insights',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPixCreateRoute = ApiPixCreateRouteImport.update({
@@ -41,9 +42,14 @@ const ApiPixCreateRoute = ApiPixCreateRouteImport.update({
   path: '/api/pix/create',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiCpfCpfRoute = ApiCpfCpfRouteImport.update({
-  id: '/api/cpf/$cpf',
-  path: '/api/cpf/$cpf',
+const ApiPixStatusRoute = ApiPixStatusRouteImport.update({
+  id: '/api/pix/status',
+  path: '/api/pix/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FunilPosSplatRoute = FunilPosSplatRouteImport.update({
+  id: '/funil/pos/$',
+  path: '/funil/pos/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/funil/$page': typeof FunilPageRoute
   '/api/cpf/$cpf': typeof ApiCpfCpfRoute
+  '/api/funnel/insights': typeof ApiFunnelInsightsRoute
   '/api/pix/create': typeof ApiPixCreateRoute
   '/api/pix/status': typeof ApiPixStatusRoute
   '/funil/pos/$': typeof FunilPosSplatRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/funil/$page': typeof FunilPageRoute
   '/api/cpf/$cpf': typeof ApiCpfCpfRoute
+  '/api/funnel/insights': typeof ApiFunnelInsightsRoute
   '/api/pix/create': typeof ApiPixCreateRoute
   '/api/pix/status': typeof ApiPixStatusRoute
   '/funil/pos/$': typeof FunilPosSplatRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/funil/$page': typeof FunilPageRoute
   '/api/cpf/$cpf': typeof ApiCpfCpfRoute
+  '/api/funnel/insights': typeof ApiFunnelInsightsRoute
   '/api/pix/create': typeof ApiPixCreateRoute
   '/api/pix/status': typeof ApiPixStatusRoute
   '/funil/pos/$': typeof FunilPosSplatRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/funil/$page'
     | '/api/cpf/$cpf'
+    | '/api/funnel/insights'
     | '/api/pix/create'
     | '/api/pix/status'
     | '/funil/pos/$'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/funil/$page'
     | '/api/cpf/$cpf'
+    | '/api/funnel/insights'
     | '/api/pix/create'
     | '/api/pix/status'
     | '/funil/pos/$'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/funil/$page'
     | '/api/cpf/$cpf'
+    | '/api/funnel/insights'
     | '/api/pix/create'
     | '/api/pix/status'
     | '/funil/pos/$'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FunilPageRoute: typeof FunilPageRoute
   ApiCpfCpfRoute: typeof ApiCpfCpfRoute
+  ApiFunnelInsightsRoute: typeof ApiFunnelInsightsRoute
   ApiPixCreateRoute: typeof ApiPixCreateRoute
   ApiPixStatusRoute: typeof ApiPixStatusRoute
   FunilPosSplatRoute: typeof FunilPosSplatRoute
@@ -124,18 +137,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FunilPageRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/funil/pos/$': {
-      id: '/funil/pos/$'
-      path: '/funil/pos/$'
-      fullPath: '/funil/pos/$'
-      preLoaderRoute: typeof FunilPosSplatRouteImport
+    '/api/cpf/$cpf': {
+      id: '/api/cpf/$cpf'
+      path: '/api/cpf/$cpf'
+      fullPath: '/api/cpf/$cpf'
+      preLoaderRoute: typeof ApiCpfCpfRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/pix/status': {
-      id: '/api/pix/status'
-      path: '/api/pix/status'
-      fullPath: '/api/pix/status'
-      preLoaderRoute: typeof ApiPixStatusRouteImport
+    '/api/funnel/insights': {
+      id: '/api/funnel/insights'
+      path: '/api/funnel/insights'
+      fullPath: '/api/funnel/insights'
+      preLoaderRoute: typeof ApiFunnelInsightsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/pix/create': {
@@ -145,11 +158,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPixCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/cpf/$cpf': {
-      id: '/api/cpf/$cpf'
-      path: '/api/cpf/$cpf'
-      fullPath: '/api/cpf/$cpf'
-      preLoaderRoute: typeof ApiCpfCpfRouteImport
+    '/api/pix/status': {
+      id: '/api/pix/status'
+      path: '/api/pix/status'
+      fullPath: '/api/pix/status'
+      preLoaderRoute: typeof ApiPixStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/funil/pos/$': {
+      id: '/funil/pos/$'
+      path: '/funil/pos/$'
+      fullPath: '/funil/pos/$'
+      preLoaderRoute: typeof FunilPosSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FunilPageRoute: FunilPageRoute,
   ApiCpfCpfRoute: ApiCpfCpfRoute,
+  ApiFunnelInsightsRoute: ApiFunnelInsightsRoute,
   ApiPixCreateRoute: ApiPixCreateRoute,
   ApiPixStatusRoute: ApiPixStatusRoute,
   FunilPosSplatRoute: FunilPosSplatRoute,
