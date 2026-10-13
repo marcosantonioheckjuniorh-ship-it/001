@@ -45,38 +45,52 @@ export const Route = createFileRoute('/api/pix/status')({
           const isPaid = providerStatus === 'paid'
           const normalizedStatus = isPaid ? 'COMPLETED' : providerStatus.toUpperCase() || 'PENDING'
 
-          if (isPaid) try {
-            const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-            const { data: existing } = await supabaseAdmin
-              .from('pix_transactions')
-              .select('*')
-              .eq('transaction_id', transactionId)
-              .maybeSingle()
+          if (isPaid) {
+            let existing: any = null
+            let dbOk = false
+            try {
+              const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+              const r = await supabaseAdmin.from('pix_transactions').select('*').eq('transaction_id', transactionId).maybeSingle()
+              if (r.error) throw r.error
+              existing = r.data
+              dbOk = true
+              await supabaseAdmin.from('pix_transactions')
+                .update({ status: 'COMPLETED', paid_at: new Date().toISOString() })
+                .eq('transaction_id', transactionId)
+            } catch (e) { console.warn('[pix] db skipped:', (e as any)?.message) }
 
-            await supabaseAdmin
-              .from('pix_transactions')
-              .update({ status: 'COMPLETED', paid_at: new Date().toISOString() })
-              .eq('transaction_id', transactionId)
-
-            // Só envia UTMify uma vez (quando muda de PENDING -> COMPLETED)
-            if (existing && existing.status !== 'COMPLETED') {
-              const { sendUtmifyOrder } = await import('@/lib/utmify.server')
-              await sendUtmifyOrder({
-                orderId: transactionId,
-                status: 'paid',
-                amountInCents: existing.amount,
-                productTitle: existing.product ?? 'Havan',
-                productId: existing.product ?? undefined,
-                customer: {
-                  name: existing.customer_name,
-                  document: existing.customer_cpf,
-                },
-                utm: existing.utm,
-                createdAt: existing.created_at ? new Date(existing.created_at) : undefined,
-                approvedAt: new Date(),
-              })
+            // Envia "pago" à UTMify. Com banco: só uma vez. Sem banco (fora do Lovable):
+            // usa os dados vindos do próprio gateway (UTMify trata orderId repetido como atualização).
+            if (!dbOk || (existing && existing.status !== 'COMPLETED')) {
+              try {
+                const d = result?.data ?? {}
+                const meta = d.metadata ?? d.tracking ?? {}
+                let utm: string | null = existing?.utm ?? (typeof meta.utm === 'string' ? meta.utm : null)
+                if (!utm) {
+                  const q = new URLSearchParams()
+                  for (const k of ['utm_source','utm_campaign','utm_medium','utm_content','utm_term','src','sck','fbclid'])
+                    if (meta[k]) q.set(k, String(meta[k]))
+                  utm = q.toString() || null
+                }
+                const c = d.customer ?? {}
+                const { sendUtmifyOrder } = await import('@/lib/utmify.server')
+                await sendUtmifyOrder({
+                  orderId: transactionId,
+                  status: 'paid',
+                  amountInCents: existing?.amount ?? d.amount,
+                  productTitle: existing?.product ?? d.externalId ?? d.items?.[0]?.title ?? 'Havan',
+                  productId: existing?.product ?? d.externalId ?? undefined,
+                  customer: {
+                    name: existing?.customer_name ?? c.name,
+                    document: existing?.customer_cpf ?? c.document?.number ?? c.document,
+                  },
+                  utm,
+                  createdAt: existing?.created_at ? new Date(existing.created_at) : (d.createdAt ? new Date(d.createdAt) : undefined),
+                  approvedAt: new Date(),
+                } as any)
+              } catch (e) { console.warn('[pix] utmify paid failed:', (e as any)?.message) }
             }
-          } catch (e) { console.warn('[pix] db/utmify update skipped:', (e as any)?.message) }
+          }
 
           return new Response(JSON.stringify({ status: normalizedStatus, data: result?.data ?? null }), {
             status: 200, headers: { 'Content-Type': 'application/json' },
