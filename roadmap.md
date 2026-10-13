@@ -5,4 +5,4 @@
 - [x] Confirmar reprodução no fluxo completo
 - [x] Adicionar pergunta de estado civil
 - [x] Price map of funnel (front, ups, backs)
-- [ ] Chat audios play one at a time on mobile (incl. coming from VSL button)
+- [x] Chat audios play one at a time on mobile (incl. coming from VSL button)
