@@ -73,9 +73,12 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
                 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
                 <script>
                     (function(){
+                        // R$ 11,34 (?v2=1): sem VSL e sem áudio — não carrega o vídeo.
+                        if (new URLSearchParams(window.location.search).get('v2') === '1') return;
                         var v = document.getElementById('nativeVsl');
                         var fill = document.getElementById('vslProgress');
                         var arrow = document.getElementById('vslArrow');
+                        var overlay = document.getElementById('vslUnmuteOverlay');
                         if (!v) return;
                         var ended = false;
                         var src = 'https://cdn.converteai.net/a0115334-6dcd-43e4-8bd0-be2c842a6cbf/69ea1d19af7645fdd1e4fc8c/main.m3u8';
@@ -83,12 +86,36 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
                         else if (window.Hls && window.Hls.isSupported()) { var hls = new Hls(); hls.loadSource(src); hls.attachMedia(v); }
                         else { v.src = src; }
                         v.loop = false;
-                        v.muted = true;
+                        v.volume = 1;
                         var tryPlay = function(){ if (ended) return; var p = v.play(); if (p && p.catch) p.catch(function(){}); };
                         tryPlay();
                         v.addEventListener('pause', function(){ if (!ended) setTimeout(tryPlay, 0); });
                         v.addEventListener('ended', function(){ ended = true; if (arrow) arrow.style.display = 'block'; });
                         v.addEventListener('timeupdate', function(){ if (v.duration) fill.style.width = (v.currentTime / v.duration * 100) + '%'; });
+                        var tryUnmutedAutoplay = function(){
+                            try {
+                                v.muted = false; v.volume = 1;
+                                var p = v.play();
+                                if (p && p.then) {
+                                    p.then(function(){ if (overlay) overlay.style.display = 'none'; })
+                                     .catch(function(){ v.muted = true; tryPlay(); });
+                                }
+                            } catch(e) { v.muted = true; tryPlay(); }
+                        };
+                        tryUnmutedAutoplay();
+                        var unmute = function(){
+                            v.muted = false; v.volume = 1; tryPlay();
+                            if (overlay) overlay.style.display = 'none';
+                            ['pointerdown','touchstart','keydown','click','scroll','mousemove','touchmove'].forEach(function(e){
+                                document.removeEventListener(e, unmute, true);
+                                window.removeEventListener(e, unmute, true);
+                            });
+                        };
+                        ['pointerdown','touchstart','keydown','click','scroll','mousemove','touchmove'].forEach(function(e){
+                            document.addEventListener(e, unmute, true);
+                            window.addEventListener(e, unmute, true);
+                        });
+                        if (overlay) overlay.addEventListener('click', unmute);
                     })();
                 </script>
             </div>
