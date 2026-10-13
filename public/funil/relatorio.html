@@ -17,7 +17,7 @@ h2{font-size:17px;margin:8px 0}
 <h2>Caminhos (de onde veio → pra onde foi)</h2><div id="t2"></div>
 <script>
 const U='https://xaxlyhkxxoquypemizer.supabase.co/rest/v1/rpc/funnel_report',K='sb_publishable_4Xeky6w6KAFphFbNRE4fLg_maaSMTIR'
-const ORDER=['inicio','1','2','3','4','5','6','7','8','9','10','11','12','pagfront','back/front','back/frontvsl','back/frontvsl_v2','up1','up1check','up1check_desc','up2','up2check','up2check_desc','up3','up3check','up3check_desc','up4','up4check','up4check_desc','up5','up5check','up5check_desc','up6','up6check','up6check_desc','up7','up7check','up7check_desc','up8','up8check','up8check_desc','obrigado']
+const ORDER=['inicio','1','2','3','4','5','6','7','8','9','10','11','12','12/intermediaria','12/chat_final','pagfront','back/front','back/frontvsl','back/frontvsl_v2','up1','up1check','up1check_desc','up2','up2check','up2check_desc','up3','up3check','up3check_desc','up4','up4check','up4check_desc','up5','up5check','up5check_desc','up6','up6check','up6check_desc','up7','up7check','up7check_desc','up8','up8check','up8check_desc','obrigado']
 const rank=p=>{const i=ORDER.indexOf(p);return i<0?999:i}
 async function load(){
   const r=await fetch(U,{method:'POST',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify({_days:+d.value})})
