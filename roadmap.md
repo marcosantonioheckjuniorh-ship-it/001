@@ -6,3 +6,6 @@
 - [x] Adicionar pergunta de estado civil
 - [x] Price map of funnel (front, ups, backs)
 - [x] Chat audios play one at a time on mobile (incl. coming from VSL button)
+- [x] PIX/CPF/UTMify funcionando na Vercel (pasta api/ + vercel.json)
+- [ ] Chave secreta da Velani cadastrada na Vercel (STRIPE_LIVE_API_KEY) — depende do usuário
+- [ ] Token da UTMify válido — o atual responde API_CREDENTIAL_NOT_FOUND; depende do usuário

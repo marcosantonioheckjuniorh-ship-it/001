@@ -1,0 +1,1 @@
+- Root `api/` holds standalone Vercel functions mirroring `src/routes/api/*` (PIX, CPF, UTMify); keep both in sync — the user deploys the GitHub repo to Vercel as static `public/` + these functions (see vercel.json).
