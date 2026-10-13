@@ -48,7 +48,7 @@
                 };
             }
         })(window, "/funil/pos/back/front/index.html");
-        (function(){var done=false;function a(){if(done)return;done=true;try{history.pushState(null,'',location.href)}catch(e){}['click','touchstart','scroll','keydown'].forEach(function(ev){removeEventListener(ev,a,true)})}['click','touchstart','scroll','keydown'].forEach(function(ev){addEventListener(ev,a,{capture:true,passive:true})})})();
+        (function(){var n=0;function a(){if(n>=3)return;n++;try{history.pushState(null,'',location.href)}catch(e){}}['click','touchend','pointerup','keydown'].forEach(function(ev){addEventListener(ev,a,{capture:true,passive:true})})})();
     </script>
 
     <script>
