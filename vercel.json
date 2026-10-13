@@ -1,0 +1,9 @@
+{
+  "framework": null,
+  "installCommand": "echo skip",
+  "buildCommand": "rm -rf out && mkdir -p out && cp -r public/. out/",
+  "outputDirectory": "out",
+  "redirects": [
+    { "source": "/", "destination": "/funil/1/index.html", "permanent": false }
+  ]
+}
