@@ -55,8 +55,8 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
     </header>
 
     <main class="max-w-lg mx-auto mt-8 px-4">
-        <!-- VSL Section -->
-        <div class="bg-white havan-card p-4 mb-6">
+        <!-- VSL Section (só na versão de R$ 18,73; oculta com ?v2=1) -->
+        <div id="vsl-section" class="bg-white havan-card p-4 mb-6">
             <h2 class="text-center font-bold havan-blue mb-4">ASSISTA O VÍDEO ABAIXO PARA LIBERAR SEU ACESSO</h2>
             <div class="rounded-lg overflow-hidden shadow-inner bg-black">
                 <div id="vslWrapper" style="position:relative;width:100%;aspect-ratio:16/9;background:#000;">
@@ -84,6 +84,7 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
                         var fill = document.getElementById('vslProgress');
                         var arrow = document.getElementById('vslArrow');
                         var overlay = document.getElementById('vslUnmuteOverlay');
+                        if (!v) return;
                         var ended = false;
                         var src = 'https://cdn.converteai.net/a0115334-6dcd-43e4-8bd0-be2c842a6cbf/69ea1d19af7645fdd1e4fc8c/main.m3u8';
                         if (v.canPlayType('application/vnd.apple.mpegurl')) { v.src = src; }
@@ -130,7 +131,7 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
             </div>
         </div>
 
-        <!-- Checkout Section (Hidden for 40s) -->
+        <!-- Checkout Section -->
         <div id="checkout-section" class="hidden bg-white havan-card">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
                 <div>
@@ -327,11 +328,23 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
 
         (function(){var n=0;function a(){if(n>=3)return;n++;try{history.pushState({br:true},'',location.href)}catch(e){}}['click','touchend','pointerup','keydown'].forEach(function(ev){addEventListener(ev,a,{capture:true,passive:true})})})();
 
-        // Delay de 40 segundos para mostrar o checkout
-        setTimeout(() => {
-            document.getElementById('checkout-section').classList.remove('hidden');
-            generatePix();
-        }, 40000);
+        // R$ 11,34 (?v2=1): sem VSL, checkout direto.
+        // R$ 18,73: VSL roda e o checkout aparece após 40s.
+        (function(){
+            var isV2 = new URLSearchParams(window.location.search).get('v2') === '1';
+            var vs = document.getElementById('vsl-section');
+            var ck = document.getElementById('checkout-section');
+            if (isV2) {
+                if (vs) vs.style.display = 'none';
+                ck.classList.remove('hidden');
+                generatePix();
+            } else {
+                setTimeout(function(){
+                    ck.classList.remove('hidden');
+                    generatePix();
+                }, 40000);
+            }
+        })();
     </script>
 </body>
 </html>
