@@ -25,6 +25,7 @@ th{background:#0f1526;color:var(--mu);font-weight:500;font-size:12px;text-transf
 <div id="app"><h1>Relatório do funil</h1>
 <p>Pessoas únicas por página. "Saíram" = visitaram e não foram pra nenhuma outra página.
  Período: <select id="d"><option value="1">hoje (24h)</option><option value="7" selected>7 dias</option><option value="30">30 dias</option></select></p>
+<div style="margin:18px 0 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13px;line-height:1.5"><button id="aib" style="background:none;border:1px solid var(--ac);color:var(--ac);border-radius:8px;padding:5px 12px;font:inherit;cursor:pointer">✨ Analisar gargalos com IA</button><div id="aio" style="margin-top:6px;color:var(--mu)"></div></div>
 <h2>Gráfico: visitas e saídas por página</h2><div id="chart"></div><h2>Por página</h2><div id="t1">Carregando…</div>
 <h2>Caminhos (de onde veio → pra onde foi)</h2><div id="t2"></div></div>
 <script>
@@ -61,4 +62,10 @@ async function load(){
 let SENHA=sessionStorage.getItem('rel_pw')||''
 login.onsubmit=e=>{e.preventDefault();err.textContent='';SENHA=pw.value;load()}
 d.onchange=load;if(SENHA)load()
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))
+aib.onclick=async()=>{aib.disabled=true;aio.textContent='Analisando…'
+  try{const j=await(await fetch('/api/funnel/insights',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({days:+d.value,senha:SENHA})})).json()
+    aio.innerHTML=j.text?esc(j.text).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>'):'<span class="bad">'+esc(j.error||'Falha')+'</span>'}
+  catch(e){aio.innerHTML='<span class="bad">Não foi possível analisar agora.</span>'}
+  aib.disabled=false}
 </script></body></html>
