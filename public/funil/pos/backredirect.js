@@ -96,6 +96,7 @@
   }
 
   var show = isFinal ? showFinalModal : showUpsellModal;
+  window.__brShow = show;
 
   try {
     history.pushState({ br: true }, '', window.location.href);

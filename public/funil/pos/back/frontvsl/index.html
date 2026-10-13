@@ -278,6 +278,7 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
                 return;
             }
 
+            window.__brShow = function(){ showBackModal(); };
             function showBackModal() {
                 if (document.getElementById('br2-overlay')) return;
                 var css = document.createElement('style');
