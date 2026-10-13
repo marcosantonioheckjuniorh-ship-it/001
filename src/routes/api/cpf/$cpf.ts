@@ -17,14 +17,11 @@ export const Route = createFileRoute('/api/cpf/$cpf')({
           })
         }
 
-        const apiUrl = process.env.CPF_API_URL
+        const envUrl = process.env.CPF_API_URL
+        const apiUrl = envUrl && /^https?:\/\//.test(envUrl)
+          ? envUrl
+          : 'https://api.zipcardx.online/api/v1/consult/{cpf}'
         const apiToken = process.env.CPF_API_TOKEN
-
-        if (!apiUrl) {
-          return new Response(JSON.stringify({ error: 'CPF API not configured' }), {
-            status: 503, headers: { 'Content-Type': 'application/json' },
-          })
-        }
 
         try {
           // Suporte a diferentes formatos de URL: com {cpf} placeholder, ou concatenado
@@ -33,26 +30,36 @@ export const Route = createFileRoute('/api/cpf/$cpf')({
             : apiUrl.replace(/\/$/, '') + '/' + cpf
 
           const headers: Record<string, string> = { 'Accept': 'application/json' }
-          if (apiToken) headers['Authorization'] = `Bearer ${apiToken}`
+          if (apiToken && !apiToken.startsWith('PLACEHOLDER')) headers['Authorization'] = `Bearer ${apiToken}`
 
           const upstream = await fetch(url, { headers })
           const text = await upstream.text()
           let data: any
           try { data = JSON.parse(text) } catch { data = { raw: text } }
 
-          if (!upstream.ok) {
+          if (!upstream.ok || data?.success === false) {
             console.error(`CPF API failed [${upstream.status}]: ${text.substring(0, 300)}`)
             return new Response(JSON.stringify({ error: 'provider error', status: upstream.status }), {
               status: 502, headers: { 'Content-Type': 'application/json' },
             })
           }
 
-          // Normalizar resposta para o formato esperado pelo funil.
-          // Tenta várias variantes comuns (Assertiva, CPFCNPJ.io, InvertexTO, etc.)
-          const nome = data.NOME ?? data.nome ?? data.name ?? data.data?.nome ?? data.result?.nome ?? data.dados?.nome ?? ''
-          const mae = data.NOME_MAE ?? data.MAE ?? data.mae ?? data.nome_mae ?? data.mother ?? data.data?.mae ?? data.result?.mae ?? ''
-          const sexo = (data.SEXO ?? data.sexo ?? data.gender ?? data.data?.sexo ?? '').toString().toUpperCase()
-          const nascimento = data.NASC ?? data.NASCIMENTO ?? data.nascimento ?? data.birth_date ?? data.data?.nascimento ?? null
+          // Achata respostas aninhadas ({ data: {...} }, { result: {...} }, { dados: {...} })
+          const src: Record<string, any> = {}
+          const collect = (o: any, depth = 0) => {
+            if (!o || typeof o !== 'object' || depth > 3) return
+            for (const [k, v] of Object.entries(o)) {
+              if (v && typeof v === 'object' && !Array.isArray(v)) collect(v, depth + 1)
+              else if (src[k.toLowerCase()] == null && v != null && v !== '') src[k.toLowerCase()] = v
+            }
+          }
+          collect(data)
+          const pick = (...keys: string[]) => { for (const k of keys) if (src[k] != null) return src[k]; return '' }
+
+          const nome = pick('nome', 'name', 'nome_completo', 'full_name')
+          const mae = pick('nome_mae', 'mae', 'mother', 'mother_name', 'nomemae')
+          const sexo = pick('sexo', 'gender', 'genero').toString().toUpperCase()
+          const nascimento = pick('nasc', 'nascimento', 'data_nascimento', 'datanascimento', 'birth_date', 'birthdate', 'dt_nascimento') || null
 
           return new Response(JSON.stringify({
             NOME: (nome || '').toString().toUpperCase(),
