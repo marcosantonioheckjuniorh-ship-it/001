@@ -117,4 +117,19 @@ if (/Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(navigator.userAg
   }
 })()
 
+} else {
+  // Computador: registra 1 tentativa por aba (página "computador") e não conta mais nada
+  try {
+    if (!sessionStorage.getItem('pc_logged')) {
+      sessionStorage.setItem('pc_logged', '1')
+      var q = new URLSearchParams(location.search)
+      fetch('https://xaxlyhkxxoquypemizer.supabase.co/rest/v1/funnel_events', {
+        method: 'POST', keepalive: true,
+        headers: { apikey: 'sb_publishable_4Xeky6w6KAFphFbNRE4fLg_maaSMTIR', 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify({ session_id: 'pc-' + Math.random().toString(36).slice(2), event: 'pc_blocked', page: 'computador',
+          target: location.pathname.replace(/^\/funil\//, '').slice(0, 120),
+          utm_source: (q.get('utm_source') || '').slice(0, 120) || null, utm_campaign: (q.get('utm_campaign') || '').slice(0, 200) || null }),
+      }).catch(function () {})
+    }
+  } catch (e) {}
 }

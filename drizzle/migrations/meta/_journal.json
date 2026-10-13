@@ -15,6 +15,13 @@
       "when": 1791863639218,
       "tag": "0001_funnel_report_password",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791866754095,
+      "tag": "0002_allow_pc_blocked_event",
+      "breakpoints": true
     }
   ]
 }
