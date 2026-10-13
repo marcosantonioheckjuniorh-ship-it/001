@@ -11,4 +11,4 @@
 - [x] Chave secreta da Velani cadastrada na Vercel (STRIPE_LIVE_API_KEY) — PIX confirmado pelo usuário
 - [ ] Token da UTMify válido — o atual responde API_CREDENTIAL_NOT_FOUND; depende do usuário
 
-- [ ] (OFERTAS ON) frontvsl: VSL só na versão de R$ 18,73; a de R$ 11,34 (?v2=1) sem VSL
+- [x] (OFERTAS ON) frontvsl: VSL só na versão de R$ 18,73; a de R$ 11,34 (?v2=1) sem VSL
