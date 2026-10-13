@@ -60,6 +60,10 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .footer { text-align:center; padding: 20px 16px; font-size:.75rem; color:#666; }
+        .chat-container { position:relative; }
+        .start-screen { position:absolute; inset:80px 0 0; z-index:20; background:#f4f6fb; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:12px; padding:24px; }
+        .start-screen button { width:min(320px,90%); border:0; border-radius:8px; padding:16px; background:#0a2fd6; color:#fff; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.18); }
+        .start-screen span { font-size:13px; color:#555; }
         .msg.user { background:#0a2fd6; border-radius:6px; }
         .opts { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
         .opts.grid { display:grid; grid-template-columns:1fr 1fr; }
@@ -480,27 +484,25 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
         showTyping(); await wait(ms); hideTyping();
         const s = document.createElement('div'); s.innerHTML = text; addAgentMessage(s);
     }
+    let primedAudio = null;
     async function sayAudio(file) {
-        showTyping(); await wait(1200); hideTyping();
-        const a = document.createElement('audio');
+        showTyping(); await wait(600); hideTyping();
+        const a = primedAudio || document.createElement('audio');
+        primedAudio = null;
         a.src = '/funil/12/audios/' + file; a.controls = true; a.preload = 'auto';
         addAgentMessage(a, 'audio');
+        const tryPlay = () => a.play().catch(() => {});
+        tryPlay();
         await new Promise(res => {
             let done = false; const fin = () => { if (!done) { done = true; res(); } };
-            a.addEventListener('ended', fin);
-            a.addEventListener('error', fin);
-            // segurança: se travar, segue após 40s
-            setTimeout(fin, 40000);
-            a.play().catch(() => {
-                // autoplay bloqueado: espera a pessoa tocar no play
-                const hint = document.createElement('div');
-                hint.style.cssText = 'font-size:12px;color:#666;margin-top:4px';
-                hint.textContent = '▶ Toque para ouvir o áudio';
-                a.parentNode.appendChild(hint);
-                a.addEventListener('play', () => hint.remove(), { once: true });
-            });
+            a.addEventListener('ended', fin, { once:true });
+            a.addEventListener('error', fin, { once:true });
+            a.addEventListener('loadeddata', tryPlay, { once:true });
+            a.addEventListener('canplay', tryPlay, { once:true });
+            // se o navegador bloquear, o toque no próprio player inicia e o roteiro espera
+            setTimeout(fin, 45000);
         });
-        await wait(500);
+        await wait(350);
     }
     async function card(html, ms) {
         const el = document.createElement('div');
