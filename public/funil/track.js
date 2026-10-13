@@ -1,5 +1,31 @@
 // Só conta celular (PC é mandado pro YouTube e não deve entrar nas estatísticas)
 if (/Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(navigator.userAgent)) {
+// Trava de PIX: na mesma página e mesmo valor, reaproveita o PIX gerado por 10 minutos
+// (recarregar, voltar ou abrir de novo não gera outro). Vale pra front, ups, backs, tudo.
+(function () {
+  if (window.__pixLock) return; window.__pixLock = 1
+  var LOCK_MS = 10 * 60 * 1000, base = window.fetch, inflight = {}
+  window.fetch = function (input, init) {
+    var u = typeof input === 'string' ? input : (input && input.url) || ''
+    if (u.indexOf('/api/pix/create') === -1) return base.apply(this, arguments)
+    var b = {}; try { b = JSON.parse((init && init.body) || '{}') } catch (e) {}
+    var path = location.pathname.replace(/\/index\.html$/, '/')
+    var key = 'pixlock:' + path + ':' + b.amount + ':' + (b.description || '')
+    var mk = function (txt) { return new Response(txt, { status: 200, headers: { 'Content-Type': 'application/json' } }) }
+    try {
+      var c = JSON.parse(localStorage.getItem(key) || 'null')
+      if (c && Date.now() - c.t < LOCK_MS && c.txt) return Promise.resolve(mk(c.txt))
+    } catch (e) {}
+    if (inflight[key]) return inflight[key].then(mk)
+    var self = this, args = arguments
+    inflight[key] = base.apply(self, args).then(function (r) { return r.text() }).then(function (txt) {
+      try { if (JSON.parse(txt).pixCode) localStorage.setItem(key, JSON.stringify({ t: Date.now(), txt: txt })) } catch (e) {}
+      setTimeout(function () { delete inflight[key] }, 0)
+      return txt
+    }, function (err) { delete inflight[key]; throw err })
+    return inflight[key].then(mk)
+  }
+})();
 // Voltar à prova de falhas: se o celular ignorar o truque do histórico e voltar
 // pra página anterior, essa página anterior manda a pessoa pro back certo.
 (function () {
