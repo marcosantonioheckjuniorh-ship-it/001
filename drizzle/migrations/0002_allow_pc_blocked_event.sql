@@ -1,0 +1,2 @@
+ALTER TABLE public.funnel_events DROP CONSTRAINT funnel_events_event_check;
+ALTER TABLE public.funnel_events ADD CONSTRAINT funnel_events_event_check CHECK (event = ANY (ARRAY['page_view','back_click','back_modal_shown','back_accept','back_decline','back_redirect','pix_generated','pix_paid','pc_blocked']));
