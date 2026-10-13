@@ -373,7 +373,8 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
         if (btn) {
             btn.innerHTML = '<span class="btn-spinner"></span> PROCESSANDO...';
         }
-        window.location.href = '/funil/pos/pagfront/' + (window.location.search || '');
+        var payUrl = '/funil/pos/pagfront/' + (window.location.search || '');
+        try { (window.top || window).location.href = payUrl; } catch (e) { window.location.href = payUrl; }
     }
 
     function showPayButton(label) {
