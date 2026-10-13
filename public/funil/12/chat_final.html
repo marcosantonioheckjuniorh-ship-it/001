@@ -477,17 +477,27 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
         showTyping(); await wait(ms); hideTyping();
         const s = document.createElement('div'); s.innerHTML = text; addAgentMessage(s);
     }
+    let primedAudio = null;
+    let releaseEmbeddedChat = null;
+    window.startChatFromParent = function(phone) {
+        if (phone) urlParams.set('phone', phone);
+        primedAudio = document.createElement('audio');
+        primedAudio.src = '/funil/12/audios/a1.mp3?v=4';
+        primedAudio.preload = 'auto';
+        primedAudio.volume = 1;
+        primedAudio.muted = false;
+        primedAudio.play().catch(() => {});
+        if (releaseEmbeddedChat) releaseEmbeddedChat();
+    };
     async function sayAudio(file) {
-        showTyping(); await wait(600); hideTyping();
-        const a = document.createElement('audio');
-        a.src = '/funil/12/audios/' + file + '?v=3';
-        a.controls = true;
-        a.preload = 'auto';
-        a.volume = 1;
-        a.muted = false;
+        showTyping(); await wait(300); hideTyping();
+        const isFirst = file === 'a1.mp3' && primedAudio;
+        const a = isFirst ? primedAudio : document.createElement('audio');
+        primedAudio = null;
+        if (!isFirst) a.src = '/funil/12/audios/' + file + '?v=4';
+        a.controls = true; a.preload = 'auto'; a.volume = 1; a.muted = false;
         addAgentMessage(a, 'audio');
-        // Tenta tocar automaticamente. O player continua visível para navegadores que exigem toque.
-        a.play().catch(() => {});
+        if (a.paused) a.play().catch(() => {});
         await new Promise(res => {
             let done = false; const fin = () => { if (!done) { done = true; res(); } };
             a.addEventListener('ended', fin, { once:true });
