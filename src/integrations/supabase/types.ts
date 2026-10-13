@@ -101,7 +101,7 @@ export type Database = {
     }
     Functions: {
       funnel_report: {
-        Args: { _days?: number }
+        Args: { _days?: number; _senha?: string }
         Returns: {
           event: string
           page: string
