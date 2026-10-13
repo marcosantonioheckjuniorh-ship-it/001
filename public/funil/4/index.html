@@ -311,6 +311,7 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
             resultBox.style.display = "none";
             try {
                 const responseCPF = await getCPF(cpf);
+                if (!responseCPF) { mostrarManual(cpf); return; }
                     const nomeCompleto = responseCPF.NOME || "Dados não encontrados";
                     const sexo = responseCPF.SEXO || "Não informado";
                     const cpfFormatado = responseCPF.CPF_FORMATADO || cpf;
