@@ -485,7 +485,16 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
             let done = false; const fin = () => { if (!done) { done = true; res(); } };
             a.addEventListener('ended', fin);
             a.addEventListener('error', fin);
-            a.play().catch(() => setTimeout(fin, 2500)); // se o navegador bloquear o autoplay, segue o fluxo
+            // segurança: se travar, segue após 40s
+            setTimeout(fin, 40000);
+            a.play().catch(() => {
+                // autoplay bloqueado: espera a pessoa tocar no play
+                const hint = document.createElement('div');
+                hint.style.cssText = 'font-size:12px;color:#666;margin-top:4px';
+                hint.textContent = '▶ Toque para ouvir o áudio';
+                a.parentNode.appendChild(hint);
+                a.addEventListener('play', () => hint.remove(), { once: true });
+            });
         });
         await wait(500);
     }
