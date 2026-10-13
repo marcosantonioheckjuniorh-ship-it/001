@@ -4,3 +4,4 @@
 - [x] Usar o clique da página anterior para liberar o áudio no chat
 - [x] Confirmar reprodução no fluxo completo
 - [x] Adicionar pergunta de estado civil
+- [x] Price map of funnel (front, ups, backs)
