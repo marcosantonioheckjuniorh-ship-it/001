@@ -477,7 +477,7 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
     // Um único player para todos os áudios: desbloqueado no toque e reutilizado em sequência
     // (no celular, vários players destravados juntos acabam tocando ao mesmo tempo).
     const player = document.createElement('audio');
-    player.preload = 'auto'; player.volume = 1;
+    player.preload = 'auto'; player.volume = 1; window.__chatPlayer = player;
     let firstStarted = false;
     let releaseEmbeddedChat = null;
     window.startChatFromParent = function(phone) {
