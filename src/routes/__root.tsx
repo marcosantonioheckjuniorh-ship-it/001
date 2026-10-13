@@ -72,18 +72,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Funnel Perfection streamlines user journeys by integrating and refining multi-step processes." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Funnel Perfection streamlines user journeys by integrating and refining multi-step processes." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Funnel Perfection streamlines user journeys by integrating and refining multi-step processes." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c2984043-883e-4da3-94b0-aa6653d7e847/id-preview-e1d350fd--a255062a-0241-4e72-8829-67c21a656775.lovable.app-1778539375993.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c2984043-883e-4da3-94b0-aa6653d7e847/id-preview-e1d350fd--a255062a-0241-4e72-8829-67c21a656775.lovable.app-1778539375993.png" },
     ],
     links: [
       {
