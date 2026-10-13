@@ -26,6 +26,7 @@ th{background:#0f1526;color:var(--mu);font-weight:500;font-size:12px;text-transf
 <p>Pessoas únicas por página. "Saíram" = visitaram e não foram pra nenhuma outra página.
  Período: <select id="d"><option value="1">hoje (24h)</option><option value="7" selected>7 dias</option><option value="30">30 dias</option></select></p>
 <div style="margin:18px 0 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13px;line-height:1.5"><button id="aib" style="background:none;border:1px solid var(--ac);color:var(--ac);border-radius:8px;padding:5px 12px;font:inherit;cursor:pointer">✨ Analisar gargalos com IA</button><div id="aio" style="margin-top:6px;color:var(--mu)"></div></div>
+<div id="pc" style="margin:14px 0 0;font-size:14px;color:var(--mu)"></div>
 <h2>Gráfico: visitas e saídas por página</h2><div id="chart"></div><h2>Por página</h2><div id="t1">Carregando…</div>
 <h2>Caminhos (de onde veio → pra onde foi)</h2><div id="t2"></div></div>
 <script>
@@ -36,12 +37,14 @@ async function load(){
   const r=await fetch(U,{method:'POST',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify({_days:+d.value,_senha:SENHA})})
   const rows=await r.json(); if(!Array.isArray(rows)){sessionStorage.removeItem('rel_pw');app.style.display='none';login.style.display='block';err.textContent='Senha incorreta';return}
   login.style.display='none';app.style.display='block';sessionStorage.setItem('rel_pw',SENHA)
-  const P={},paths={},left={}
+  const P={},paths={},left={};let pcs=0
   for(const x of rows){
+    if(x.event==='pc_blocked'){pcs+=+x.sessions;continue}
     const p=P[x.page]||(P[x.page]={page_view:0,back_click:0,back_modal_shown:0,back_accept:0,back_decline:0,pix_generated:0,pix_paid:0,cameFrom:0})
     if(x.event in p)p[x.event]+=+x.sessions
     if(x.event==='page_view'&&x.target){const from=x.target.replace('voltar:','');const k=from+' → '+x.page+(x.target.startsWith('voltar:')?' (voltar)':'');paths[k]=(paths[k]||0)+ +x.sessions;left[from]=(left[from]||0)+ +x.sessions}
   }
+  pc.innerHTML='🖥️ Tentativas pelo computador (bloqueadas → YouTube): <b style="color:var(--tx)">'+pcs+'</b>'
   const pages=Object.keys(P).sort((a,b)=>rank(a)-rank(b))
   let h='<table><tr><th>Página</th><th>Visitas</th><th>Saíram</th><th>Voltar</th><th>Aviso de saída</th><th>Aceitou</th><th>Recusou</th><th>PIX gerado</th><th>PIX pago</th></tr>'
   for(const pg of pages){const p=P[pg],out=Math.max(0,p.page_view-(left[pg]||0)),pct=p.page_view?Math.round(out/p.page_view*100):0
