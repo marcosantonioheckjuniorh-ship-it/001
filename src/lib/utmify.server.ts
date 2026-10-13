@@ -86,7 +86,7 @@ function parseUtm(utm?: string | null) {
 }
 
 export async function sendUtmifyOrder(input: UtmifyOrderInput): Promise<void> {
-  const token = process.env.UTMIFY_API_TOKEN
+  const token = process.env.UTMIFY_API_TOKEN || '4TfTSugiB4sWA0W5KqNOKvfRsxg0Z8B3pWvR'
   if (!token) {
     console.warn('[utmify] UTMIFY_API_TOKEN not set; skipping order send')
     return
