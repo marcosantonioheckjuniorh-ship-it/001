@@ -76,7 +76,7 @@ export const Route = createFileRoute('/api/pix/status')({
                 approvedAt: new Date(),
               })
             }
-          }
+          } catch (e) { console.warn('[pix] db/utmify update skipped:', (e as any)?.message) }
 
           return new Response(JSON.stringify({ status: normalizedStatus, data: result?.data ?? null }), {
             status: 200, headers: { 'Content-Type': 'application/json' },
