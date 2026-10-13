@@ -177,6 +177,19 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
             <p><strong>Sexo:</strong> <span id="sexo"></span></p>
             <button class="btn-custom" onclick="continuar()">Continuar</button>
         </div>
+        <!-- Cadastro manual (quando a consulta não retorna) -->
+        <div id="manualBox" style="display:none;text-align:initial;margin-top:16px;padding:16px;border:1px solid #e3e3e3;border-radius:10px;background:#fafafa">
+            <p style="font-weight:700;margin:0 0 6px;color:#0a3d8f">CPF ainda não cadastrado em nossa base</p>
+            <p style="font-size:13px;color:#555;margin:0 0 14px">Sem problemas! Complete seus dados abaixo para criar seu cadastro e continuar.</p>
+            <label for="mNome" class="form-label" style="color:gray;font-size:13px">Nome completo</label>
+            <input type="text" class="form-control" id="mNome" placeholder="Seu nome completo" autocomplete="name" style="margin-bottom:10px">
+            <label for="mNasc" class="form-label" style="color:gray;font-size:13px">Data de nascimento</label>
+            <input type="text" class="form-control" id="mNasc" placeholder="DD/MM/AAAA" inputmode="numeric" maxlength="10" style="margin-bottom:10px">
+            <label for="mCpf" class="form-label" style="color:gray;font-size:13px">CPF</label>
+            <input type="text" class="form-control" id="mCpf" placeholder="000.000.000-00" inputmode="numeric" maxlength="14" style="margin-bottom:10px">
+            <p id="mErr" style="display:none;color:#c62828;font-size:13px;margin:0 0 10px"></p>
+            <button type="button" class="btn-custom" onclick="confirmarManual()">Continuar cadastro</button>
+        </div>
     </div>
     <!-- Script -->
     <script>
@@ -189,16 +202,57 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
             e.target.value = value;
         });
         async function getCPF(strCPF) {
-            // Tenta a API real primeiro; se falhar, usa fallback local.
+            // Tenta a API real (máx. 8s); se falhar, retorna null => formulário manual.
             try {
-                const r = await fetch('/api/cpf/' + strCPF, { headers: { 'Accept': 'application/json' } });
+                const ctrl = new AbortController();
+                const t = setTimeout(() => ctrl.abort(), 8000);
+                const r = await fetch('/api/cpf/' + strCPF, { headers: { 'Accept': 'application/json' }, signal: ctrl.signal });
+                clearTimeout(t);
                 if (r.ok) {
                     const d = await r.json();
                     if (d && d.NOME && !d.error) return d;
                 }
             } catch (_) {}
-            return generateFallbackData(strCPF);
+            return null;
         }
+        function mostrarManual(cpf) {
+            const box = document.getElementById("manualBox");
+            const m = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+            document.getElementById("mCpf").value = m;
+            document.getElementById("loader").style.display = "none";
+            document.getElementById("consultarBtn").style.display = "none";
+            box.style.display = "block";
+            box.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        function confirmarManual() {
+            const nome = document.getElementById("mNome").value.trim().replace(/\s+/g, " ");
+            const nasc = document.getElementById("mNasc").value.trim();
+            const cpf = document.getElementById("mCpf").value.replace(/\D/g, "");
+            const err = document.getElementById("mErr");
+            err.style.display = "none";
+            const okNasc = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(nasc);
+            let msg = "";
+            if (nome.split(" ").length < 2) msg = "Informe seu nome completo.";
+            else if (!okNasc || +okNasc[1] < 1 || +okNasc[1] > 31 || +okNasc[2] < 1 || +okNasc[2] > 12 || +okNasc[3] < 1900 || +okNasc[3] > 2015) msg = "Informe a data de nascimento no formato DD/MM/AAAA.";
+            else if (!validaCPF(cpf)) msg = "Confira o número do CPF.";
+            if (msg) { err.innerText = msg; err.style.display = "block"; return; }
+            localStorage.setItem("dadosCPF", JSON.stringify({
+                nomeCompleto: nome.toUpperCase(), sexo: "Não informado",
+                cpfFormatado: cpf, nascimento: nasc, mae: "", cpf
+            }));
+            continuar();
+        }
+        document.addEventListener('input', function (e) {
+            if (e.target.id === 'mNasc') {
+                let v = e.target.value.replace(/\D/g, '').slice(0, 8);
+                v = v.replace(/(\d{2})(\d)/, '$1/$2').replace(/(\d{2})\/(\d{2})(\d)/, '$1/$2/$3');
+                e.target.value = v;
+            } else if (e.target.id === 'mCpf') {
+                let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+                v = v.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                e.target.value = v;
+            }
+        });
         // Função para gerar dados simulados como fallback
         function generateFallbackData(cpf) {
             const nomes = [
@@ -257,6 +311,7 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/></
             resultBox.style.display = "none";
             try {
                 const responseCPF = await getCPF(cpf);
+                if (!responseCPF) { mostrarManual(cpf); return; }
                     const nomeCompleto = responseCPF.NOME || "Dados não encontrados";
                     const sexo = responseCPF.SEXO || "Não informado";
                     const cpfFormatado = responseCPF.CPF_FORMATADO || cpf;
