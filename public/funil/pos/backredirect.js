@@ -59,12 +59,12 @@
     overlay.id = 'br-overlay';
     overlay.innerHTML =
       '<div id="br-box">' +
-      '<h2>ESPERE! SUA ÚLTIMA CHANCE</h2>' +
-      '<p>Essa oferta vai sair do ar e você pode perder tudo. Conclua agora com desconto:</p>' +
+      '<h2>PARE! VOCÊ PODE PAGAR MENOS</h2>' +
+      '<p>Não finalize pelo valor cheio. Antes de sair, aproveite esta redução no preço e continue para o pagamento com <b>desconto aplicado</b>:</p>' +
       '<div id="br-disc"><strong>' + fmt(DISCOUNT) + ' DE DESCONTO</strong>' +
-      '<span>válido somente nesta página, agora</span></div>' +
-      '<button id="br-yes">QUERO MEU DESCONTO</button>' +
-      '<button id="br-no">Não, obrigado. Quero pagar o valor cheio.</button>' +
+      '<span>O desconto será aplicado no próximo pagamento</span></div>' +
+      '<button id="br-yes">SIM, QUERO PAGAR MENOS</button>' +
+      '<button id="br-no">Voltar para a oferta</button>' +
       '</div>';
     document.body.appendChild(overlay);
     document.getElementById('br-yes').addEventListener('click', function () {
@@ -83,11 +83,11 @@
     overlay.id = 'br-overlay';
     overlay.innerHTML =
       '<div id="br-box">' +
-      '<h2>ÚLTIMA CHANCE MESMO!</h2>' +
-      '<p>Se você sair agora, perde o desconto e a oferta. Vamos dar <b>mais um desconto</b> para você finalizar:</p>' +
+      '<h2>O PREÇO CAIU AINDA MAIS!</h2>' +
+      '<p>Você já tem um desconto. Agora pode <b>economizar ainda mais</b>: aceite a redução extra e continue para o pagamento pelo novo valor.</p>' +
       '<div id="br-disc"><strong>+ ' + fmt(FINAL_EXTRA) + ' DE DESCONTO EXTRA</strong>' +
-      '<span>essa é realmente a última chance</span></div>' +
-      '<button id="br-yes">FINALIZAR COM DESCONTO</button>' +
+      '<span>Desconto extra somado ao desconto já aplicado</span></div>' +
+      '<button id="br-yes">APLICAR DESCONTO EXTRA</button>' +
       '</div>';
     document.body.appendChild(overlay);
     document.getElementById('br-yes').addEventListener('click', function () {
