@@ -42,6 +42,13 @@ if (/Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(navigator.userAg
   var URL_ = 'https://xaxlyhkxxoquypemizer.supabase.co/rest/v1/funnel_events'
   var KEY = 'sb_publishable_4Xeky6w6KAFphFbNRE4fLg_maaSMTIR'
   var qs = new URLSearchParams(location.search)
+  // UTM: da URL atual; se faltar (link perdeu, chat dentro do iframe), usa a guardada da entrada
+  try {
+    var st = JSON.parse(localStorage.getItem('funnel_qs') || '{}'), ch = false
+    qs.forEach(function (v, k) { if (/^(utm_|src$|sck$|fbclid$)/.test(k) && v) { st[k] = v; ch = true } })
+    if (ch) localStorage.setItem('funnel_qs', JSON.stringify(st))
+    ;['utm_source', 'utm_campaign'].forEach(function (k) { if (!qs.get(k) && st[k]) qs.set(k, st[k]) })
+  } catch (e) {}
   var sid = localStorage.getItem('funnel_sid')
   if (!sid) { sid = Date.now().toString(36) + Math.random().toString(36).slice(2, 10); localStorage.setItem('funnel_sid', sid) }
   var path = location.pathname.replace(/\/index\.html$/, '').replace(/\/$/, '')

@@ -29,6 +29,13 @@
       "when": 1791867110862,
       "tag": "0003_funnel_report_utm_counts",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791867245143,
+      "tag": "0004_funnel_report_utm_first_event",
+      "breakpoints": true
     }
   ]
 }
