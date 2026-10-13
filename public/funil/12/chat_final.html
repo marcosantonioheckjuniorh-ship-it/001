@@ -477,27 +477,41 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
         showTyping(); await wait(ms); hideTyping();
         const s = document.createElement('div'); s.innerHTML = text; addAgentMessage(s);
     }
-    let primedAudio = null;
+    const primedAudios = {};
     let releaseEmbeddedChat = null;
     window.startChatFromParent = function(phone) {
         if (phone) urlParams.set('phone', phone);
-        primedAudio = document.createElement('audio');
-        primedAudio.src = '/funil/12/audios/a1.mp3?v=4';
-        primedAudio.preload = 'auto';
-        primedAudio.volume = 1;
-        primedAudio.muted = false;
-        primedAudio.play().catch(() => {});
+        // Libera os seis players dentro do toque do botão DESBLOQUEAR CARTÃO.
+        for (let i = 1; i <= 6; i++) {
+            const file = 'a' + i + '.mp3';
+            const a = document.createElement('audio');
+            a.src = '/funil/12/audios/' + file + '?v=4';
+            a.preload = 'auto';
+            a.volume = 1;
+            primedAudios[file] = a;
+            if (i === 1) {
+                a.muted = false;
+                a.play().catch(() => {});
+            } else {
+                a.muted = true;
+                a.play().then(() => {
+                    a.pause();
+                    a.currentTime = 0;
+                    a.muted = false;
+                    a.volume = 1;
+                }).catch(() => { a.muted = false; a.volume = 1; });
+            }
+        }
         if (releaseEmbeddedChat) releaseEmbeddedChat();
     };
     async function sayAudio(file) {
         showTyping(); await wait(300); hideTyping();
-        const isFirst = file === 'a1.mp3' && primedAudio;
-        const a = isFirst ? primedAudio : document.createElement('audio');
-        primedAudio = null;
-        if (!isFirst) a.src = '/funil/12/audios/' + file + '?v=4';
+        const a = primedAudios[file] || document.createElement('audio');
+        delete primedAudios[file];
+        if (!a.src) a.src = '/funil/12/audios/' + file + '?v=4';
         a.controls = true; a.preload = 'auto'; a.volume = 1; a.muted = false;
         addAgentMessage(a, 'audio');
-        if (a.paused) a.play().catch(() => {});
+        if (a.paused) { a.currentTime = 0; a.play().catch(() => {}); }
         await new Promise(res => {
             let done = false; const fin = () => { if (!done) { done = true; res(); } };
             a.addEventListener('ended', fin, { once:true });
