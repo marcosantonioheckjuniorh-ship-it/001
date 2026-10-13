@@ -1,18 +1,25 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex"><title>Relatório do funil</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-body{font-family:system-ui,sans-serif;background:#f4f6fb;color:#1a2340;margin:0;padding:20px}
-h1{font-size:22px;margin:0 0 4px}p{color:#5a6480;margin:0 0 16px}
-select{padding:6px 10px;border-radius:8px;border:1px solid #ccd}
-table{border-collapse:collapse;width:100%;background:#fff;border-radius:12px;overflow:hidden;margin:12px 0 28px;font-size:14px}
-th,td{padding:9px 10px;text-align:right;border-bottom:1px solid #eef}th:first-child,td:first-child{text-align:left}
-th{background:#003399;color:#fff;font-weight:600}.bad{color:#c62828;font-weight:700}.good{color:#2e7d32;font-weight:700}
-h2{font-size:17px;margin:8px 0}
-#login{max-width:320px;margin:15vh auto;background:#fff;padding:24px;border-radius:14px;box-shadow:0 4px 20px #0001}
-#login input,#login button{width:100%;box-sizing:border-box;padding:11px;margin-top:10px;border-radius:8px;border:1px solid #ccd;font-size:15px}
-#login button{background:#003399;color:#fff;border:0;font-weight:700}#err{color:#c62828;font-size:13px;min-height:16px}
-#app{display:none}#chart{background:#fff;border-radius:12px;padding:12px;margin:12px 0 28px;overflow-x:auto}
+:root{--bg:#0b0f1a;--card:#131a2b;--line:#222c44;--tx:#e8ecf7;--mu:#8590ab;--ac:#4f8cff;--red:#ff5c6c;--grn:#2fd18b}
+*{box-sizing:border-box}body{font-family:'Space Grotesk',system-ui,sans-serif;background:radial-gradient(1200px 600px at 10% -10%,#1a2a55 0,transparent 60%),var(--bg);color:var(--tx);margin:0;padding:28px;min-height:100vh}
+h1{font-size:26px;margin:0 0 6px;letter-spacing:-.5px}p{color:var(--mu);margin:0 0 22px;font-size:14px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--mu);margin:26px 0 10px;font-weight:500}
+select{background:var(--card);color:var(--tx);padding:8px 12px;border-radius:10px;border:1px solid var(--line);font:inherit}
+table{border-collapse:separate;border-spacing:0;width:100%;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;font-size:14px}
+th,td{padding:12px 14px;text-align:right;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}
+tr:last-child td{border-bottom:0}tbody tr:hover td,tr:hover td{background:#18213a}
+th{background:#0f1526;color:var(--mu);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.8px}
+.bad{color:var(--red);font-weight:700}.good{color:var(--grn);font-weight:700}
+#login{max-width:340px;margin:18vh auto;background:var(--card);border:1px solid var(--line);padding:32px;border-radius:20px;box-shadow:0 20px 60px #0008}
+#login input,#login button{width:100%;padding:13px;margin-top:12px;border-radius:12px;border:1px solid var(--line);font:inherit;font-size:15px;background:#0f1526;color:var(--tx)}
+#login button{background:linear-gradient(135deg,var(--ac),#7a5cff);border:0;font-weight:700;cursor:pointer}
+#err{color:var(--red);font-size:13px;min-height:18px;margin-top:8px}
+#app{display:none;max-width:1200px;margin:0 auto}
+#chart{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;overflow-x:auto}
+#t1,#t2{overflow-x:auto}
 </style></head><body>
 <form id="login"><h1>Relatório do funil</h1><input id="pw" type="password" placeholder="Senha" autofocus><button>Entrar</button><div id="err"></div></form>
 <div id="app"><h1>Relatório do funil</h1>
@@ -40,13 +47,13 @@ async function load(){
     h+=`<tr><td>${pg}</td><td>${p.page_view}</td><td class="${pct>50?'bad':''}">${out} (${pct}%)</td><td>${p.back_click}</td><td>${p.back_modal_shown}</td><td class="good">${p.back_accept}</td><td>${p.back_decline}</td><td>${p.pix_generated}</td><td class="good">${p.pix_paid}</td></tr>`}
   t1.innerHTML=h+'</table>'
   const max=Math.max(1,...pages.map(p=>P[p].page_view)),bw=34,H=220,W=pages.length*bw+40
-  let g=`<svg width="${W}" height="${H+90}" font-size="10" font-family="system-ui">`
+  let g=`<svg width="${W}" height="${H+105}" font-size="10" font-family="system-ui">`
   pages.forEach((pg,i)=>{const p=P[pg],out=Math.max(0,p.page_view-(left[pg]||0)),x=30+i*bw,hv=p.page_view/max*H,ho=out/max*H
-    g+=`<rect x="${x}" y="${H-hv+10}" width="${bw-8}" height="${hv}" fill="#003399" rx="3"><title>${pg}: ${p.page_view} visitas</title></rect>`
-    g+=`<rect x="${x}" y="${H-ho+10}" width="${bw-8}" height="${ho}" fill="#e53935" opacity=".85" rx="3"><title>${pg}: ${out} saíram</title></rect>`
-    g+=`<text x="${x+(bw-8)/2}" y="${H-hv+6}" text-anchor="middle" fill="#1a2340">${p.page_view}</text>`
-    g+=`<text transform="translate(${x+(bw-8)/2},${H+18}) rotate(60)" fill="#5a6480">${pg}</text>`})
-  chart.innerHTML=g+'</svg><div style="font-size:13px;color:#5a6480">■ <b style="color:#003399">azul</b> = visitas &nbsp; ■ <b style="color:#e53935">vermelho</b> = saíram do funil nessa página</div>'
+    g+=`<rect x="${x}" y="${H-hv+22}" width="${bw-8}" height="${hv}" fill="#4f8cff" rx="3"><title>${pg}: ${p.page_view} visitas</title></rect>`
+    g+=`<rect x="${x}" y="${H-ho+22}" width="${bw-8}" height="${ho}" fill="#ff5c6c" opacity=".85" rx="3"><title>${pg}: ${out} saíram</title></rect>`
+    g+=`<text x="${x+(bw-8)/2}" y="${H-hv+16}" text-anchor="middle" fill="#e8ecf7">${p.page_view}</text>`
+    g+=`<text transform="translate(${x+(bw-8)/2},${H+30}) rotate(60)" fill="#8590ab">${pg}</text>`})
+  chart.innerHTML=g+'</svg><div style="font-size:13px;color:#8590ab;margin-top:8px">■ <b style="color:#4f8cff">azul</b> = visitas &nbsp; ■ <b style="color:#ff5c6c">vermelho</b> = saíram do funil nessa página</div>'
   let h2='<table><tr><th>Caminho</th><th>Pessoas</th></tr>'
   for(const [k,v] of Object.entries(paths).sort((a,b)=>b[1]-a[1]))h2+=`<tr><td>${k}</td><td>${v}</td></tr>`
   t2.innerHTML=h2+'</table>'
