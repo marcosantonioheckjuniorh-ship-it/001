@@ -106,7 +106,7 @@
   } catch (e) {}
 
   // Chrome ignora o voltar sem toque: reforça no 1º toque/rolagem
-  (function(){var done=false;function a(){if(done)return;done=true;try{history.pushState({br:true},'',location.href)}catch(e){}['click','touchstart','scroll','keydown'].forEach(function(ev){removeEventListener(ev,a,true)})}['click','touchstart','scroll','keydown'].forEach(function(ev){addEventListener(ev,a,{capture:true,passive:true})})})();
+  (function(){var n=0;function a(){if(n>=3)return;n++;try{history.pushState({br:true},'',location.href)}catch(e){}}['click','touchend','pointerup','keydown'].forEach(function(ev){addEventListener(ev,a,{capture:true,passive:true})})})();
 
   if (!isFinal) {
     document.addEventListener('mouseout', function (e) {
