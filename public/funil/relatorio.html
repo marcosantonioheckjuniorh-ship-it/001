@@ -25,7 +25,6 @@ th{background:#0f1526;color:var(--mu);font-weight:500;font-size:12px;text-transf
 <div id="app"><h1>Relatório do funil</h1>
 <p>Pessoas únicas por página. "Saíram" = visitaram e não foram pra nenhuma outra página.
  Período: <select id="d"><option value="1">hoje (24h)</option><option value="7" selected>7 dias</option><option value="30">30 dias</option></select></p>
-<h2>Análise inteligente: gargalos e melhorias</h2><div id="ai" style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;font-size:14px;line-height:1.6"><button id="aib" style="background:linear-gradient(135deg,var(--ac),#7a5cff);color:var(--tx);border:0;border-radius:12px;padding:11px 18px;font:inherit;font-weight:700;cursor:pointer">Analisar funil com IA</button><div id="aio" style="margin-top:12px;color:var(--tx)"></div></div>
 <h2>Gráfico: visitas e saídas por página</h2><div id="chart"></div><h2>Por página</h2><div id="t1">Carregando…</div>
 <h2>Caminhos (de onde veio → pra onde foi)</h2><div id="t2"></div></div>
 <script>
@@ -62,11 +61,4 @@ async function load(){
 let SENHA=sessionStorage.getItem('rel_pw')||''
 login.onsubmit=e=>{e.preventDefault();err.textContent='';SENHA=pw.value;load()}
 d.onchange=load;if(SENHA)load()
-const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))
-const md=s=>esc(s).replace(/^### (.*)$/gm,'<h3 style="margin:14px 0 4px">$1</h3>').replace(/^## (.*)$/gm,'<h3 style="margin:14px 0 4px">$1</h3>').replace(/^# (.*)$/gm,'<h3>$1</h3>').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^\s*[-*] (.*)$/gm,'• $1').replace(/\n/g,'<br>')
-aib.onclick=async()=>{aib.disabled=true;aib.textContent='Analisando… (pode levar até 1 min)';aio.innerHTML=''
-  try{const r=await fetch('/api/funnel/insights',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({days:+d.value,senha:SENHA})});const j=await r.json()
-    aio.innerHTML=j.text?md(j.text):'<span class="bad">'+esc(j.error||'Falha na análise')+'</span>'}
-  catch(e){aio.innerHTML='<span class="bad">Não foi possível analisar agora.</span>'}
-  aib.disabled=false;aib.textContent='Analisar de novo'}
 </script></body></html>
