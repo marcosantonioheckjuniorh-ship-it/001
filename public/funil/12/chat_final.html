@@ -585,6 +585,9 @@ src="https://www.facebook.com/tr?id=1062555759088296&ev=PageView&noscript=1"/></
         await say('<strong>Pergunta de segurança 3 — Qual é o seu CPF?</strong>', 700);
         await ask(fakeCpfs(d.cpf), 'grid');
 
+        await say('<strong>Pergunta de segurança 4 — Qual é o seu estado civil?</strong>', 700);
+        await ask(['Solteiro(a)','Casado(a)','Viúvo(a)','Separado(a) judicialmente','Em relação estável']);
+
         await card({ loading: 'Validando dados...', done: 'Dados validados com sucesso!' }, 2600);
         await sayAudio('a2.mp3');
 
