@@ -1,4 +1,5 @@
 import { KEYS, json, sendUtmify } from '../_lib.js'
+import { sendFbPurchase } from '../_fbcapi.js'
 
 export async function GET(request) {
   try {
@@ -28,6 +29,7 @@ export async function GET(request) {
         customer: { name: c.name, email: c.email, phone: c.phone, document: c.document?.number || c.document },
         utm, createdAt: d.createdAt ? new Date(d.createdAt) : undefined, approvedAt: new Date(),
       })
+      await sendFbPurchase(request, { eventId: id, valueCents: d.amount, contentName: d.externalId || d.items?.[0]?.title, name: c.name, document: c.document?.number || c.document })
     }
     return json({ status: paid ? 'COMPLETED' : (st.toUpperCase() || 'PENDING'), data: d })
   } catch (e) { return json({ error: e?.message || 'unknown' }, 500) }

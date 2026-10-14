@@ -92,6 +92,17 @@ export const Route = createFileRoute('/api/pix/status')({
             }
           }
 
+          if (isPaid) {
+            try {
+              const d = result?.data ?? {}
+              const { sendFbPurchase } = await import('../../../../api/_fbcapi.js')
+              await sendFbPurchase(request, {
+                eventId: transactionId, valueCents: d.amount, contentName: d.externalId ?? d.items?.[0]?.title,
+                name: d.customer?.name, document: d.customer?.document?.number ?? d.customer?.document,
+              })
+            } catch (e) { console.warn('[pix] fb capi failed:', (e as any)?.message) }
+          }
+
           return new Response(JSON.stringify({ status: normalizedStatus, data: result?.data ?? null }), {
             status: 200, headers: { 'Content-Type': 'application/json' },
           })
