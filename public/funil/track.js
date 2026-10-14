@@ -143,6 +143,13 @@ if (/Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(navigator.userAg
           send('pix_generated', d.transactionId, amt)
         } else if (u.indexOf('/api/pix/status') !== -1 && d.status === 'COMPLETED' && !paid) {
           paid = true; send('pix_paid', d.data && d.data.id, d.data && d.data.amount)
+          // Compra no pixel do navegador com o MESMO id que o servidor manda (Facebook deduplica)
+          try {
+            if (window.fbq && d.data && d.data.id && !sessionStorage.getItem('fbp_' + d.data.id)) {
+              sessionStorage.setItem('fbp_' + d.data.id, '1')
+              window.fbq('track', 'Purchase', { value: (Number(d.data.amount) || 0) / 100, currency: 'BRL' }, { eventID: String(d.data.id) })
+            }
+          } catch (e) {}
         }
       }).catch(function () {})
       return r
