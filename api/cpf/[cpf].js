@@ -8,13 +8,15 @@ export async function GET(request) {
     const expanded = base.replace(/\$?\{cpf\}/g, cpf)
     const url = new URL(expanded)
     const headers = { Accept: 'application/json' }
+    // O token pode vir dentro da própria CPF_API_URL ou em CPF_API_TOKEN (este tem prioridade).
+    const tokenNaUrl = [...url.searchParams.keys()].some((k) => k.toLowerCase() === 'token')
     if (url.hostname === 'api.zapgroup.shop') {
-      if (!KEYS.CPF_API_TOKEN) return json({ error: 'Consulta indisponível' }, 503)
       url.searchParams.set('cpf', cpf)
-      url.searchParams.set('token', KEYS.CPF_API_TOKEN)
+      if (KEYS.CPF_API_TOKEN) url.searchParams.set('token', KEYS.CPF_API_TOKEN)
+      else if (!tokenNaUrl) return json({ error: 'Consulta indisponível' }, 503)
     } else {
       if (expanded === base) url.pathname = url.pathname.replace(/\/$/, '') + '/' + cpf
-      if (KEYS.CPF_API_TOKEN) headers.Authorization = `Bearer ${KEYS.CPF_API_TOKEN}`
+      if (KEYS.CPF_API_TOKEN && !tokenNaUrl) headers.Authorization = `Bearer ${KEYS.CPF_API_TOKEN}`
     }
     const up = await fetch(url, { headers })
     const text = await up.text()

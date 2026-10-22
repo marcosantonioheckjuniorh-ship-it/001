@@ -29,13 +29,15 @@ export const Route = createFileRoute('/api/cpf/$cpf')({
           const url = new URL(expanded)
 
           const headers: Record<string, string> = { 'Accept': 'application/json' }
+          // O token pode vir dentro da própria CPF_API_URL ou em CPF_API_TOKEN (este tem prioridade).
+          const tokenNaUrl = [...url.searchParams.keys()].some((k) => k.toLowerCase() === 'token')
           if (url.hostname === 'api.zapgroup.shop') {
-            if (!apiToken) return Response.json({ error: 'Consulta indisponível' }, { status: 503 })
             url.searchParams.set('cpf', cpf)
-            url.searchParams.set('token', apiToken)
+            if (apiToken) url.searchParams.set('token', apiToken)
+            else if (!tokenNaUrl) return Response.json({ error: 'Consulta indisponível' }, { status: 503 })
           } else {
             if (expanded === apiUrl) url.pathname = url.pathname.replace(/\/$/, '') + '/' + cpf
-            if (apiToken) headers['Authorization'] = `Bearer ${apiToken}`
+            if (apiToken && !tokenNaUrl) headers['Authorization'] = `Bearer ${apiToken}`
           }
 
           const upstream = await fetch(url, { headers })
