@@ -16,7 +16,7 @@ const cookie = (h, k) => (h || '').split(/;\s*/).map((c) => c.split('=')).find((
  */
 export async function sendFbPurchase(request, o) {
   const pixels = [
-    [process.env.FB_PIXEL_ID || '2319361472239559', process.env.FB_ACCESS_TOKEN],
+    [process.env.FB_PIXEL_ID || '1519965703223189', process.env.FB_ACCESS_TOKEN],
     [process.env.FB_PIXEL_ID_2 || '1412206041980551', process.env.FB_ACCESS_TOKEN_2],
   ].filter(([, t]) => t)
   if (!pixels.length || !o.eventId) return
