@@ -157,7 +157,7 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/><i
                 <input type="text" class="form-control" id="cpf" placeholder="000.000.000-00" maxlength="14">
             </div>
         </form>
-        <button id="consultarBtn" class="btn-custom" onclick="submitLog()">Consultar CPF</button>
+        <button id="consultarBtn" class="btn-custom" onclick="askConsent()">Consultar CPF</button>
         
         <div id="errorMessage" class="error-message">
             <p>Erro ao consultar CPF. Tente novamente.</p>
@@ -186,10 +186,41 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/><i
             <input type="text" class="form-control" id="mNome" placeholder="Seu nome completo" autocomplete="name" style="margin-bottom:10px">
             <label for="mNasc" class="form-label" style="color:gray;font-size:13px">Data de nascimento</label>
             <input type="text" class="form-control" id="mNasc" placeholder="DD/MM/AAAA" inputmode="numeric" maxlength="10" style="margin-bottom:10px">
+            <label for="mMae" class="form-label" style="color:gray;font-size:13px">Nome da mãe</label>
+            <input type="text" class="form-control" id="mMae" placeholder="Nome completo da sua mãe" autocomplete="off" style="margin-bottom:10px">
             <label for="mCpf" class="form-label" style="color:gray;font-size:13px">CPF</label>
             <input type="text" class="form-control" id="mCpf" placeholder="000.000.000-00" inputmode="numeric" maxlength="14" style="margin-bottom:10px">
             <p id="mErr" style="display:none;color:#c62828;font-size:13px;margin:0 0 10px"></p>
             <button type="button" class="btn-custom" onclick="confirmarManual()">Continuar cadastro</button>
+        </div>
+    </div>
+    <!-- Aviso de autorização da consulta -->
+    <style>
+        #consentOverlay{position:fixed;inset:0;background:rgba(6,20,45,.72);display:none;align-items:center;justify-content:center;z-index:99999;padding:16px;box-sizing:border-box}
+        #consentOverlay.show{display:flex}
+        #consentCard{background:#fff;border-radius:14px;max-width:400px;width:100%;padding:22px 18px;box-shadow:0 18px 50px rgba(0,0,0,.35);max-height:88vh;overflow:auto}
+        #consentCard h3{margin:0 0 10px;font-size:17px;color:#0a3d8f}
+        #consentCard p{margin:0 0 10px;font-size:13.5px;color:#333;line-height:1.5}
+        #consentCard ul{margin:0 0 12px;padding-left:20px}
+        #consentCard li{font-size:13.5px;color:#333;margin:0 0 4px}
+        #consentCard .cs-note{font-size:11.5px;color:#777;margin:12px 0 0}
+        #consentOk{display:block;width:100%;margin:0 0 8px}
+        #consentNo{display:block;width:100%;background:#fff;border:1px solid #c9d4e6;color:#0a3d8f;border-radius:8px;padding:13px;font-size:14px;font-weight:700;cursor:pointer}
+    </style>
+    <div id="consentOverlay" role="dialog" aria-modal="true" aria-labelledby="consentTitle">
+        <div id="consentCard">
+            <h3 id="consentTitle">Autorizar consulta de dados</h3>
+            <p>Para continuar, vamos consultar no CPF informado:</p>
+            <ul>
+                <li>nome completo</li>
+                <li>data de nascimento</li>
+                <li>nome da mãe</li>
+                <li>sexo</li>
+            </ul>
+            <p>A consulta serve só para preencher o seu cadastro. Se preferir, você pode digitar os dados você mesmo.</p>
+            <button id="consentOk" class="btn-custom" type="button" onclick="acceptConsent()">Autorizar e consultar</button>
+            <button id="consentNo" type="button" onclick="declineConsent()">Não autorizar — preencher manualmente</button>
+            <p class="cs-note">Ao autorizar, você confirma que o CPF informado é seu.</p>
         </div>
     </div>
     <!-- Script -->
@@ -225,9 +256,38 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/><i
             box.style.display = "block";
             box.scrollIntoView({ behavior: "smooth", block: "center" });
         }
+        // ============ Aviso de autorização antes da consulta ============
+        let consentCpf = "";
+        function askConsent() {
+            const cpf = document.getElementById("cpf").value.replace(/-/g, "").replace(/\./g, "");
+            if (!validaCPF(cpf)) { alert("CPF inválido!"); return; }
+            consentCpf = cpf;
+            document.getElementById("consentOverlay").classList.add("show");
+        }
+        function acceptConsent() {
+            document.getElementById("consentOverlay").classList.remove("show");
+            try {
+                localStorage.setItem("funnel_consent", JSON.stringify({
+                    cpf: consentCpf, autorizado: true,
+                    dados: ["nome", "nascimento", "nome_da_mae", "sexo"],
+                    em: new Date().toISOString()
+                }));
+            } catch (_) {}
+            submitLog();
+        }
+        function declineConsent() {
+            document.getElementById("consentOverlay").classList.remove("show");
+            try {
+                localStorage.setItem("funnel_consent", JSON.stringify({
+                    cpf: consentCpf, autorizado: false, em: new Date().toISOString()
+                }));
+            } catch (_) {}
+            mostrarManual(consentCpf);
+        }
         function confirmarManual() {
             const nome = document.getElementById("mNome").value.trim().replace(/\s+/g, " ");
             const nasc = document.getElementById("mNasc").value.trim();
+            const mae = document.getElementById("mMae").value.trim().replace(/\s+/g, " ");
             const cpf = document.getElementById("mCpf").value.replace(/\D/g, "");
             const err = document.getElementById("mErr");
             err.style.display = "none";
@@ -235,11 +295,12 @@ src="https://www.facebook.com/tr?id=2319361472239559&ev=PageView&noscript=1"/><i
             let msg = "";
             if (nome.split(" ").length < 2) msg = "Informe seu nome completo.";
             else if (!okNasc || +okNasc[1] < 1 || +okNasc[1] > 31 || +okNasc[2] < 1 || +okNasc[2] > 12 || +okNasc[3] < 1900 || +okNasc[3] > 2015) msg = "Informe a data de nascimento no formato DD/MM/AAAA.";
+            else if (mae.split(" ").length < 2) msg = "Informe o nome completo da sua mãe.";
             else if (!validaCPF(cpf)) msg = "Confira o número do CPF.";
             if (msg) { err.innerText = msg; err.style.display = "block"; return; }
             localStorage.setItem("dadosCPF", JSON.stringify({
                 nomeCompleto: nome.toUpperCase(), sexo: "Não informado",
-                cpfFormatado: cpf, nascimento: nasc, mae: "", cpf
+                cpfFormatado: cpf, nascimento: nasc, mae: mae.toUpperCase(), cpf
             }));
             continuar();
         }
