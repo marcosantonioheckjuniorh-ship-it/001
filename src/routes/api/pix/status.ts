@@ -19,7 +19,7 @@ export const Route = createFileRoute('/api/pix/status')({
           }
 
           const baseUrl = process.env.VELANI_BASE_URL || 'https://api.velanipagamentos.com.br/api/v1/api-gateway/v1'
-          const apiKey = process.env.STRIPE_LIVE_API_KEY || process.env.VELANI_SECRET_KEY || (await import('@/lib/keys.server')).KEYS.VELANI_SECRET_KEY || process.env.VELANI_PUBLIC_KEY || 'pk_live_cfc26a59d486f8fc734b9ab724bb76997660944a4f90184e'
+          const apiKey = process.env.STRIPE_LIVE_API_KEY || process.env.VELANI_SECRET_KEY || (await import('@/lib/keys.server')).KEYS.VELANI_SECRET_KEY || process.env.VELANI_PUBLIC_KEY || 'pk_live_1a2069cd98ef4f36c853bf0dba19c802bee4676cc3e8a4b0'
           if (!apiKey) {
             return new Response(JSON.stringify({ error: 'Velani key not configured' }), {
               status: 500, headers: { 'Content-Type': 'application/json' },
