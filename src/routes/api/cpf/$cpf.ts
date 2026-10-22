@@ -20,17 +20,23 @@ export const Route = createFileRoute('/api/cpf/$cpf')({
         const envUrl = process.env.CPF_API_URL
         const apiUrl = envUrl && /^https?:\/\//.test(envUrl)
           ? envUrl
-          : 'https://api.zipcardx.online/api/v1/consult/{cpf}'
-        const apiToken = process.env.CPF_API_TOKEN || 'a13676abe925caa4ac181611b357b8224d5a6a1c4853b22fbfabef04e77b0174'
+          : 'https://api.zapgroup.shop/consultar-filtrada/cpf?cpf={cpf}'
+        const apiToken = process.env.CPF_API_TOKEN || ''
 
         try {
           // Suporte a diferentes formatos de URL: com {cpf} placeholder, ou concatenado
-          const url = apiUrl.includes('{cpf}')
-            ? apiUrl.replace('{cpf}', cpf)
-            : apiUrl.replace(/\/$/, '') + '/' + cpf
+          const expanded = apiUrl.replace(/\$?\{cpf\}/g, cpf)
+          const url = new URL(expanded)
 
           const headers: Record<string, string> = { 'Accept': 'application/json' }
-          if (apiToken && !apiToken.startsWith('PLACEHOLDER')) headers['Authorization'] = `Bearer ${apiToken}`
+          if (url.hostname === 'api.zapgroup.shop') {
+            if (!apiToken) return Response.json({ error: 'Consulta indisponível' }, { status: 503 })
+            url.searchParams.set('cpf', cpf)
+            url.searchParams.set('token', apiToken)
+          } else {
+            if (expanded === apiUrl) url.pathname = url.pathname.replace(/\/$/, '') + '/' + cpf
+            if (apiToken) headers['Authorization'] = `Bearer ${apiToken}`
+          }
 
           const upstream = await fetch(url, { headers })
           const text = await upstream.text()
@@ -38,7 +44,7 @@ export const Route = createFileRoute('/api/cpf/$cpf')({
           try { data = JSON.parse(text) } catch { data = { raw: text } }
 
           if (!upstream.ok || data?.success === false) {
-            console.error(`CPF API failed [${upstream.status}]: ${text.substring(0, 300)}`)
+            console.error(`CPF API failed [${upstream.status}]`)
             return new Response(JSON.stringify({ error: 'provider error', status: upstream.status }), {
               status: 502, headers: { 'Content-Type': 'application/json' },
             })
@@ -49,7 +55,7 @@ export const Route = createFileRoute('/api/cpf/$cpf')({
           const collect = (o: any, depth = 0) => {
             if (!o || typeof o !== 'object' || depth > 3) return
             for (const [k, v] of Object.entries(o)) {
-              if (v && typeof v === 'object' && !Array.isArray(v)) collect(v, depth + 1)
+              if (v && typeof v === 'object') collect(v, depth + 1)
               else if (src[k.toLowerCase()] == null && v != null && v !== '') src[k.toLowerCase()] = v
             }
           }
@@ -68,10 +74,9 @@ export const Route = createFileRoute('/api/cpf/$cpf')({
             NASCIMENTO: nascimento,
             CPF_FORMATADO: cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'),
           }), { status: 200, headers: { 'Content-Type': 'application/json' } })
-        } catch (err: any) {
-          console.error('CPF proxy error:', err)
-          return new Response(JSON.stringify({ error: err?.message ?? 'unknown' }), {
-            status: 500, headers: { 'Content-Type': 'application/json' },
+        } catch {
+          return new Response(JSON.stringify({ error: 'Consulta indisponível' }), {
+            status: 502, headers: { 'Content-Type': 'application/json' },
           })
         }
       },

@@ -1,7 +1,7 @@
 // Chaves fixas no código (pedido do dono do projeto). Os segredos do projeto têm prioridade.
 export const KEYS = {
-  CPF_API_URL: 'https://api.zipcardx.online/api/v1/consult/{cpf}',
-  CPF_API_TOKEN: 'a13676abe925caa4ac181611b357b8224d5a6a1c4853b22fbfabef04e77b0174',
+  CPF_API_URL: 'https://api.zapgroup.shop/consultar-filtrada/cpf?cpf={cpf}',
+  CPF_API_TOKEN: '', // Configurado apenas em CPF_API_TOKEN no ambiente do servidor.
   VELANI_BASE_URL: 'https://api.velanipagamentos.com.br/api/v1/api-gateway/v1',
   // Chave secreta da Velani (gera o PIX). Preencha para funcionar fora do Lovable.
   VELANI_SECRET_KEY: '',

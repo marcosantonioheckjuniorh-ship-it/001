@@ -1,8 +1,8 @@
 // Funções da Vercel (fora do Lovable). Mesma lógica de src/routes/api/*.
 // A chave secreta da Velani vem da variável STRIPE_LIVE_API_KEY (ou VELANI_SECRET_KEY) na Vercel.
 export const KEYS = {
-  CPF_API_URL: process.env.CPF_API_URL || 'https://api.zipcardx.online/api/v1/consult/{cpf}',
-  CPF_API_TOKEN: process.env.CPF_API_TOKEN || 'a13676abe925caa4ac181611b357b8224d5a6a1c4853b22fbfabef04e77b0174',
+  CPF_API_URL: process.env.CPF_API_URL || 'https://api.zapgroup.shop/consultar-filtrada/cpf?cpf={cpf}',
+  CPF_API_TOKEN: process.env.CPF_API_TOKEN || '',
   VELANI_BASE_URL: process.env.VELANI_BASE_URL || 'https://api.velanipagamentos.com.br/api/v1/api-gateway/v1',
   VELANI_SECRET_KEY: process.env.STRIPE_LIVE_API_KEY || process.env.VELANI_SECRET_KEY || '',
   UTMIFY_API_TOKEN: process.env.UTMIFY_API_TOKEN || '4TfTSugiB4sWA0W5KqNOKvfRsxg0Z8B3pWvR',

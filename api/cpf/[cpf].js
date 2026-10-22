@@ -4,10 +4,18 @@ export async function GET(request) {
   const cpf = decodeURIComponent(new URL(request.url).pathname.split('/').pop() || '').replace(/\D/g, '')
   if (cpf.length !== 11) return json({ error: 'CPF inválido' }, 400)
   try {
-    const base = /^https?:\/\//.test(KEYS.CPF_API_URL) ? KEYS.CPF_API_URL : 'https://api.zipcardx.online/api/v1/consult/{cpf}'
-    const url = base.includes('{cpf}') ? base.replace('{cpf}', cpf) : base.replace(/\/$/, '') + '/' + cpf
+    const base = /^https?:\/\//.test(KEYS.CPF_API_URL) ? KEYS.CPF_API_URL : 'https://api.zapgroup.shop/consultar-filtrada/cpf?cpf={cpf}'
+    const expanded = base.replace(/\$?\{cpf\}/g, cpf)
+    const url = new URL(expanded)
     const headers = { Accept: 'application/json' }
-    if (KEYS.CPF_API_TOKEN && !KEYS.CPF_API_TOKEN.startsWith('PLACEHOLDER')) headers.Authorization = `Bearer ${KEYS.CPF_API_TOKEN}`
+    if (url.hostname === 'api.zapgroup.shop') {
+      if (!KEYS.CPF_API_TOKEN) return json({ error: 'Consulta indisponível' }, 503)
+      url.searchParams.set('cpf', cpf)
+      url.searchParams.set('token', KEYS.CPF_API_TOKEN)
+    } else {
+      if (expanded === base) url.pathname = url.pathname.replace(/\/$/, '') + '/' + cpf
+      if (KEYS.CPF_API_TOKEN) headers.Authorization = `Bearer ${KEYS.CPF_API_TOKEN}`
+    }
     const up = await fetch(url, { headers })
     const text = await up.text()
     let data; try { data = JSON.parse(text) } catch { data = { raw: text } }
@@ -16,7 +24,7 @@ export async function GET(request) {
     const collect = (o, depth = 0) => {
       if (!o || typeof o !== 'object' || depth > 3) return
       for (const [k, v] of Object.entries(o)) {
-        if (v && typeof v === 'object' && !Array.isArray(v)) collect(v, depth + 1)
+        if (v && typeof v === 'object') collect(v, depth + 1)
         else if (src[k.toLowerCase()] == null && v != null && v !== '') src[k.toLowerCase()] = v
       }
     }
@@ -30,5 +38,5 @@ export async function GET(request) {
       NASCIMENTO: pick('nasc', 'nascimento', 'data_nascimento', 'datanascimento', 'birth_date', 'birthdate', 'dt_nascimento') || null,
       CPF_FORMATADO: cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'),
     })
-  } catch (e) { return json({ error: e?.message || 'unknown' }, 500) }
+  } catch { return json({ error: 'Consulta indisponível' }, 502) }
 }
