@@ -1,9 +1,13 @@
 {
-  "framework": null,
-  "installCommand": "echo skip",
+  "framework": "other",
+  "installCommand": "bun install",
   "buildCommand": "rm -rf out && mkdir -p out && cp -r public/. out/",
   "outputDirectory": "out",
   "redirects": [
-    { "source": "/", "destination": "/funil/1/index.html", "permanent": false }
+    {
+      "source": "/",
+      "destination": "/funil/1/index.html",
+      "permanent": false
+    }
   ]
 }
