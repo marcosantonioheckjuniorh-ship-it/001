@@ -1,8 +1,5 @@
 {
-  "framework": null,
-  "installCommand": "echo skip",
-  "buildCommand": "rm -rf out && mkdir -p out && cp -r public/. out/",
-  "outputDirectory": "out",
+  "framework": "tanstack-start-lovable",
   "redirects": [
     {
       "source": "/",
