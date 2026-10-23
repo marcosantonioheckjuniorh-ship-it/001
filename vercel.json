@@ -1,4 +1,8 @@
 {
+  "framework": null,
+  "installCommand": "echo skip",
+  "buildCommand": "rm -rf out && mkdir -p out && cp -r public/. out/",
+  "outputDirectory": "out",
   "redirects": [
     {
       "source": "/",
